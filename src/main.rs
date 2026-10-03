@@ -10,14 +10,15 @@ fn current_time() -> String {
     println!("{}", local_time);
 
     let local_time = local_time.to_string();
-    return local_time;
+    local_time
 }
 
 fn log_time() {
     let mut contents =
         fs::read_to_string(FILE_PATH).expect("Should have been able to read the file");
 
-    contents += &current_time()[..];
+    // contents += &current_time()[..];
+    contents.push_str(&current_time());
 
     fs::write(FILE_PATH, contents).expect("Should write on the file");
 }
