@@ -1,2 +1,3 @@
 /target
-/src/dates.log
+/.env
+dates.log
