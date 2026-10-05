@@ -1,14 +1,6 @@
-mod config;
-mod error;
-mod handlers;
-mod middleware;
-mod routes;
-mod state;
-mod storage;
-
 use anyhow::{Context, Result};
 
-use crate::{config::Config, state::AppState};
+use tally::{config::Config, routes, state::AppState};
 
 #[tokio::main]
 async fn main() -> Result<()> {

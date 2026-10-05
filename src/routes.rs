@@ -2,7 +2,7 @@ use axum::{
     Router,
     middleware::from_fn_with_state,
     response::Redirect,
-    routing::{delete, get, post},
+    routing::{get, post},
 };
 
 use crate::{
