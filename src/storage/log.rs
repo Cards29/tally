@@ -35,6 +35,11 @@ pub fn read_log(file_name: &str) -> Result<String> {
     }
 }
 
+pub fn last_entry(file_name: &str) -> Result<String> {
+    let contents = read_log(file_name)?;
+    Ok(contents.lines().last().unwrap_or("").to_string())
+}
+
 pub fn clear_last_entry(file_name: &str) -> Result<()> {
     let contents = read_log(file_name)?;
     let trimmed = contents.trim_end_matches("\n");

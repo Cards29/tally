@@ -23,7 +23,7 @@ pub fn router(state: AppState) -> Router {
                 .get(log::show_log)
                 .delete(log::clear_all),
         )
-        .route("/log/last", delete(log::clear_last))
+        .route("/log/last", get(log::show_last).delete(log::clear_last))
         .route_layer(from_fn_with_state(state.clone(), auth::require_token));
 
     public.merge(protected).with_state(state)
