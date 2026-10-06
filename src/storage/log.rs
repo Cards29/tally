@@ -6,8 +6,8 @@ use std::io::{self, Write};
 /// Returns the current local time formatted as `Mon, Oct 06 2026 14:03:09`.
 fn current_time() -> String {
     let local_time: DateTime<Local> = Local::now();
-    let local_time = local_time.format("%a, %b %d %Y %H:%M:%S").to_string();
-    local_time
+
+    local_time.format("%a, %b %d %Y %H:%M:%S").to_string()
 }
 
 /// Appends the current local time as a new line, creating the file if missing.
