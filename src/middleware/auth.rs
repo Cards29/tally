@@ -8,6 +8,9 @@ use subtle::ConstantTimeEq;
 
 use crate::state::AppState;
 
+/// Rejects the request with 401 unless `Authorization: Bearer <token>` matches `AUTH_TOKEN`.
+///
+/// The comparison runs in constant time, so response timing does not leak the token.
 pub async fn require_token(
     State(state): State<AppState>,
     request: Request,

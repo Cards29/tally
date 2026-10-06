@@ -11,6 +11,7 @@ use crate::{
     state::AppState,
 };
 
+/// Builds the app router. `/log` routes require a bearer token; `/` and `/health` are public.
 pub fn router(state: AppState) -> Router {
     let public = Router::new()
         .route("/", get(|| async { Redirect::temporary("/health") }))

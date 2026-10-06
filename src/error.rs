@@ -3,8 +3,10 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
+/// Handler error that wraps any `anyhow::Error` and becomes a 500 response.
 pub struct AppError(anyhow::Error);
 
+/// Logs the full error chain to stderr and returns a bare 500.
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         eprintln!("{:#}", self.0);

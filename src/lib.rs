@@ -1,3 +1,5 @@
+//! Logs button-press timestamps sent over HTTP to a plain text file.
+
 pub mod config;
 pub mod error;
 pub mod handlers;

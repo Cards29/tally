@@ -36,7 +36,7 @@ Rust learning project: an axum + tokio web app that logs button-press timestamps
 ## Storage
 
 `src/storage/log.rs` uses blocking `std::fs`:
-- `log_time`: appends the current local time (`%a, %b %d %Y %I:%M:%S %p`) and returns it.
+- `log_time`: appends the current local time (`%a, %b %d %Y %H:%M:%S`) and returns it.
 - `read_log`: returns the file contents. A missing file (`NotFound`) means an empty log, not an error.
 - `clear_log`, `clear_last_entry`, `last_entry`.
 
