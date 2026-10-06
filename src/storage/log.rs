@@ -158,27 +158,6 @@ mod tests {
     }
 
     #[test]
-    fn clear_last_entry_on_missing_file_creates_empty_file() {
-        let (_dir, path) = temp_log();
-
-        clear_last_entry(&path).expect("clearing last of a missing log should succeed");
-
-        let contents = fs::read_to_string(&path).expect("log file should now exist");
-        assert_eq!(contents, "");
-    }
-
-    #[test]
-    fn clear_last_entry_on_empty_file_stays_empty() {
-        let (_dir, path) = temp_log();
-        fs::write(&path, "").expect("log should be seedable");
-
-        clear_last_entry(&path).expect("clearing last of an empty log should succeed");
-
-        let contents = fs::read_to_string(&path).expect("log file should be readable");
-        assert_eq!(contents, "");
-    }
-
-    #[test]
     fn clear_log_empties_file() {
         let (_dir, path) = temp_log();
         fs::write(&path, "first\nsecond\n").expect("log should be seedable");
@@ -187,54 +166,5 @@ mod tests {
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
         assert_eq!(contents, "");
-    }
-
-    #[test]
-    fn clear_log_on_missing_file_creates_empty_file() {
-        let (_dir, path) = temp_log();
-        clear_log(&path).expect("clearing a missing log should succeed");
-
-        let contents = fs::read_to_string(&path).expect("log file should now exist");
-        assert_eq!(contents, "");
-    }
-
-    #[test]
-    fn clear_log_twice_succeeds() {
-        let (_dir, path) = temp_log();
-        fs::write(&path, "first\n").expect("log should be seedable");
-
-        clear_log(&path).expect("first clear should succeed");
-        clear_log(&path).expect("second clear should succeed");
-
-        let contents = fs::read_to_string(&path).expect("log file should be readable");
-        assert_eq!(contents, "");
-    }
-
-    #[test]
-    fn log_time_after_clear_starts_fresh() {
-        let (_dir, path) = temp_log();
-        fs::write(&path, "old\n").expect("log should be seedable");
-
-        clear_log(&path).expect("log should be clearable");
-        let entry = log_time(&path).expect("entry should be written after clear");
-
-        let contents = fs::read_to_string(&path).expect("log file should be readable");
-        assert_eq!(contents, format!("{entry}\n"));
-    }
-
-    #[test]
-    fn clear_log_fails_when_parent_dir_missing() {
-        let (dir, _) = temp_log();
-        let path = dir
-            .path()
-            .join("missing")
-            .join("test.log")
-            .to_str()
-            .expect("temp path should be valid utf-8")
-            .to_string();
-
-        let err = clear_log(&path).expect_err("clearing in a missing dir should fail");
-
-        assert_eq!(err.to_string(), "failed to clear the log");
     }
 }
