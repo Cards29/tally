@@ -65,6 +65,9 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 - `LogStore` trait for storage (do not add until asked).
 - `GET /log/last` returns 404 on an empty log.
 - Move storage to a cloud database. Render's free-tier filesystem is wiped on spin-down and deploy.
+- Timezones: Render runs in UTC, so `chrono::Local` stamps entries in UTC, not the owner's time.
+  - Now (no code): set `TZ` in Render's environment (e.g. `TZ=Asia/Dhaka`). If it still shows UTC, the image lacks tzdata; use a POSIX string instead (`TZ=<+06>-6` for UTC+6, sign inverted). Zone is fixed, so travel isn't handled.
+  - With the cloud database: store UTC instants (`DateTime<Utc>` / Postgres `timestamptz`), not formatted strings. The client sends its zone (e.g. an `X-Timezone: Asia/Dhaka` header) and the server formats entries in that zone on read. Needs the `chrono-tz` crate (ask before adding).
 - `clear_last` is a non-atomic read-then-write: a `POST /log` between the read and the write is lost, and a crash mid-write truncates the log. Fix when `LogStore` lands (e.g. a mutex in the store).
 - Store the log path as `PathBuf` / `&Path` instead of `String` / `&str`. Removes the `.to_str().expect(...)` in both `temp_log()` helpers. Cost: error messages need `file_name.display()`.
 
