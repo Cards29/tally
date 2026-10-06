@@ -4,7 +4,6 @@ use axum::{
     Router,
     body::{Body, to_bytes},
     http::{Method, Request, StatusCode, header},
-    response::Response,
 };
 use tempfile::TempDir;
 use tower::ServiceExt;
@@ -40,38 +39,30 @@ fn app(file_name: &str) -> Router {
     })
 }
 
-#[track_caller]
-fn request(method: Method, uri: &str, token: Option<&str>) -> Request<Body> {
-    let mut builder = Request::builder().method(method).uri(uri);
-    if let Some(token) = token {
-        builder = builder.header(header::AUTHORIZATION, format!("Bearer {token}"));
-    }
-    builder
-        .body(Body::empty())
-        .expect("request should be buildable")
-}
-
-async fn body_text(response: Response) -> String {
-    let bytes = to_bytes(response.into_body(), usize::MAX)
-        .await
-        .expect("response body should be readable");
-
-    String::from_utf8(bytes.to_vec()).expect("response body should be utf-8")
-}
-
 async fn send(
     app: &Router,
     method: Method,
     uri: &str,
     token: Option<&str>,
 ) -> (StatusCode, String) {
+    let mut request = Request::builder().method(method).uri(uri);
+    if let Some(token) = token {
+        request = request.header(header::AUTHORIZATION, format!("Bearer {token}"));
+    }
+    let request = request
+        .body(Body::empty())
+        .expect("request should be buildable");
+
     let response = app
         .clone()
-        .oneshot(request(method, uri, token))
+        .oneshot(request)
         .await
         .expect("router should respond");
     let status = response.status();
-    let body = body_text(response).await;
+    let bytes = to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("response body should be readable");
+    let body = String::from_utf8(bytes.to_vec()).expect("response body should be utf-8");
 
     (status, body)
 }

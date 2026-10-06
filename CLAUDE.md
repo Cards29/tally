@@ -14,8 +14,8 @@ Rust learning project: an axum + tokio web app that logs button-press timestamps
 
 ## Layout
 
-- `src/main.rs`: `Config::from_env()?` → `AppState { file_name, auth_token }` → `routes::router(state)` → bind `0.0.0.0:{port}` + serve.
-- `src/config.rs`: reads `FILE_NAME`, `AUTH_TOKEN`, `PORT` (default 3000). `dotenvy` loads `.env`.
+- `src/main.rs`: `Config::from_env()?` → `routes::router(config.state)` → bind `0.0.0.0:{port}` + serve.
+- `src/config.rs`: `Config { state: AppState, port }`. `from_env` loads `.env` via `dotenvy`, then reads `FILE_NAME`, `AUTH_TOKEN`, `PORT` (default 3000).
 - `src/state.rs`: `AppState { file_name, auth_token }`, `Clone`.
 - `src/error.rs`: `AppError(anyhow::Error)` newtype. `IntoResponse` logs the error and returns a bare 500. Blanket `From<E: Into<anyhow::Error>>`.
 - `src/routes.rs`: builds the router.
@@ -35,11 +35,11 @@ Rust learning project: an axum + tokio web app that logs button-press timestamps
 
 ## Storage
 
-`src/storage/log.rs` uses blocking `std::fs`:
-- `log_time`: appends the current local time (`TIME_FORMAT` = `%a, %b %d %Y %H:%M:%S`, 24-hour) and returns it.
-- `read_log`: returns the file contents. A missing file (`NotFound`) means an empty log, not an error.
-- `last_entry` and `clear_last_entry` both use the private `split_last_line`, so they agree on what "last line" means.
-- `clear_log`.
+`src/storage/log.rs` uses blocking `std::fs`. Function names match the handlers in `src/handlers/log.rs`:
+- `add_entry`: appends the current local time (`TIME_FORMAT` = `%a, %b %d %Y %H:%M:%S`, 24-hour) and returns it.
+- `show_log`: returns the file contents. A missing file (`NotFound`) means an empty log, not an error.
+- `show_last` and `clear_last` both use the private `split_last_line`, so they agree on what "last line" means.
+- `clear_all`.
 
 Known current behavior: `GET /log/last` on an empty log returns 200 with an empty body. This is planned to become 404 later.
 
@@ -64,6 +64,9 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 
 - `LogStore` trait for storage (do not add until asked).
 - `GET /log/last` returns 404 on an empty log.
+- Move storage to a cloud database. Render's free-tier filesystem is wiped on spin-down and deploy.
+- `clear_last` is a non-atomic read-then-write: a `POST /log` between the read and the write is lost, and a crash mid-write truncates the log. Fix when `LogStore` lands (e.g. a mutex in the store).
+- Store the log path as `PathBuf` / `&Path` instead of `String` / `&str`. Removes the `.to_str().expect(...)` in both `temp_log()` helpers. Cost: error messages need `file_name.display()`.
 
 ## Tests
 
@@ -71,7 +74,7 @@ Tests assert current behavior. Never change app behavior to make a test pass. 15
 
 - `src/lib.rs` holds all `pub mod` lines so `tests/` can import `tally::...`. Dev-dependencies: `tempfile` (auto-deleted temp dirs) and `tower` with `util` (`ServiceExt::oneshot`).
 - Unit tests: `#[cfg(test)] mod tests` at the bottom of `src/storage/log.rs`, sharing a `temp_log()` helper. `use super::*` already brings in the parent's imports (e.g. `fs`).
-- Integration tests: `tests/routes.rs` drives `routes::router(state)` with `oneshot`. Helpers: `TOKEN = "test-token"`, `PROTECTED` (all protected method+path pairs), `temp_log()`, `app(file_name)`, and `send(&app, method, uri, token) -> (StatusCode, String)` built on `request` and `body_text`. Every test goes through `send`.
+- Integration tests: `tests/routes.rs` drives `routes::router(state)` with `oneshot`. Helpers: `TOKEN = "test-token"`, `PROTECTED` (all protected method+path pairs), `temp_log()`, `app(file_name)`, and `send(&app, method, uri, token) -> (StatusCode, String)`, which builds the request and reads the body. Every test goes through `send`.
 - Every test uses `temp_log()`, even ones that never reach storage, so a broken auth layer can't write a real file.
 - To force a storage error, create a directory at the log path (reading a directory as a file fails).
 - `last_entry_on_empty_log_returns_ok_with_empty_body` asserts 200 + empty body. Update it when the 404 change lands.

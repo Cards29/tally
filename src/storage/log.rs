@@ -4,15 +4,13 @@ use std::{
 };
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Local};
+use chrono::Local;
 
 const TIME_FORMAT: &str = "%a, %b %d %Y %H:%M:%S";
 
 /// Returns the current local time formatted as `Mon, Oct 06 2026 14:03:09`.
 fn current_time() -> String {
-    let local_time: DateTime<Local> = Local::now();
-
-    local_time.format(TIME_FORMAT).to_string()
+    Local::now().format(TIME_FORMAT).to_string()
 }
 
 /// Appends the current local time as a new line, creating the file if missing.
@@ -20,7 +18,7 @@ fn current_time() -> String {
 ///
 /// # Errors
 /// Returns an error if the file can't be opened or written.
-pub fn log_time(file_name: &str) -> Result<String> {
+pub fn add_entry(file_name: &str) -> Result<String> {
     let entry = current_time();
     let mut file = OpenOptions::new()
         .append(true)
@@ -36,7 +34,7 @@ pub fn log_time(file_name: &str) -> Result<String> {
 ///
 /// # Errors
 /// Returns an error if the file can't be written.
-pub fn clear_log(file_name: &str) -> Result<()> {
+pub fn clear_all(file_name: &str) -> Result<()> {
     fs::write(file_name, "").with_context(|| format!("failed to clear the log in {file_name}"))?;
     Ok(())
 }
@@ -45,7 +43,7 @@ pub fn clear_log(file_name: &str) -> Result<()> {
 ///
 /// # Errors
 /// Returns an error if the file exists but can't be read.
-pub fn read_log(file_name: &str) -> Result<String> {
+pub fn show_log(file_name: &str) -> Result<String> {
     match fs::read_to_string(file_name) {
         Ok(contents) => Ok(contents),
         // No log file yet means an empty log, not an error
@@ -57,30 +55,29 @@ pub fn read_log(file_name: &str) -> Result<String> {
 /// Splits the log into (everything before the last line, the last line).
 fn split_last_line(contents: &str) -> (&str, &str) {
     let trimmed = contents.trim_end_matches('\n');
-    match trimmed.rfind('\n') {
-        Some(i) => (&trimmed[..=i], &trimmed[i + 1..]),
-        None => ("", trimmed),
-    }
+    let start = trimmed.rfind('\n').map_or(0, |i| i + 1);
+    trimmed.split_at(start)
 }
 
 /// Returns the last line of the log, or `""` if the log is empty.
 ///
 /// # Errors
 /// Returns an error if the log can't be read.
-pub fn last_entry(file_name: &str) -> Result<String> {
-    let contents = read_log(file_name)?;
-    Ok(split_last_line(&contents).1.to_string())
+pub fn show_last(file_name: &str) -> Result<String> {
+    let contents = show_log(file_name)?;
+    let (_, last) = split_last_line(&contents);
+    Ok(last.to_string())
 }
 
 /// Removes the last line of the log. Does nothing if the log is empty.
 ///
 /// # Errors
 /// Returns an error if the log can't be read or written.
-pub fn clear_last_entry(file_name: &str) -> Result<()> {
-    let contents = read_log(file_name)?;
-    let new_contents = split_last_line(&contents).0;
+pub fn clear_last(file_name: &str) -> Result<()> {
+    let contents = show_log(file_name)?;
+    let (rest, _) = split_last_line(&contents);
 
-    fs::write(file_name, new_contents)
+    fs::write(file_name, rest)
         .with_context(|| format!("failed to write {file_name} after clearing last line"))
 }
 
@@ -114,20 +111,20 @@ mod tests {
     }
 
     #[test]
-    fn read_log_returns_empty_when_file_missing() {
+    fn show_log_returns_empty_when_file_missing() {
         let (_dir, path) = temp_log();
 
-        let contents = read_log(&path).expect("missing log should be read as empty");
+        let contents = show_log(&path).expect("missing log should be read as empty");
 
         assert_eq!(contents, "");
     }
 
     #[test]
-    fn read_log_errors_when_path_is_unreadable() {
+    fn show_log_errors_when_path_is_unreadable() {
         let (_dir, path) = temp_log();
         fs::create_dir(&path).expect("directory should be creatable at log path");
 
-        let result = read_log(&path);
+        let result = show_log(&path);
 
         assert!(
             result.is_err(),
@@ -136,63 +133,63 @@ mod tests {
     }
 
     #[test]
-    fn log_time_appends_without_overwriting() {
+    fn add_entry_appends_without_overwriting() {
         let (_dir, path) = temp_log();
 
-        let first = log_time(&path).expect("first line should be written");
-        let second = log_time(&path).expect("second line should be written");
+        let first = add_entry(&path).expect("first line should be written");
+        let second = add_entry(&path).expect("second line should be written");
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
         assert_eq!(contents, format!("{first}\n{second}\n"));
     }
 
     #[test]
-    fn last_entry_returns_final_line() {
+    fn show_last_returns_final_line() {
         let (_dir, path) = temp_log();
         fs::write(&path, "first\nsecond\n").expect("log should be seedable");
 
-        let contents = last_entry(&path).expect("last entry should be readable");
+        let contents = show_last(&path).expect("last entry should be readable");
 
         assert_eq!(contents, "second");
     }
 
     #[test]
-    fn last_entry_is_empty_when_log_missing() {
+    fn show_last_is_empty_when_log_missing() {
         let (_dir, path) = temp_log();
 
-        let contents = last_entry(&path).expect("last entry should be readable");
+        let contents = show_last(&path).expect("last entry should be readable");
 
         assert_eq!(contents, "");
     }
 
     #[test]
-    fn clear_last_entry_keeps_earlier_lines() {
+    fn clear_last_keeps_earlier_lines() {
         let (_dir, path) = temp_log();
         fs::write(&path, "first\nsecond\nthird\n").expect("log should be seedable");
 
-        clear_last_entry(&path).expect("last entry should be clearable");
+        clear_last(&path).expect("last entry should be clearable");
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
         assert_eq!(contents, "first\nsecond\n");
     }
 
     #[test]
-    fn clear_last_entry_on_single_line_leaves_empty_file() {
+    fn clear_last_on_single_line_leaves_empty_file() {
         let (_dir, path) = temp_log();
         fs::write(&path, "only\n").expect("log should be seedable");
 
-        clear_last_entry(&path).expect("last entry should be clearable");
+        clear_last(&path).expect("last entry should be clearable");
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
         assert_eq!(contents, "");
     }
 
     #[test]
-    fn clear_log_empties_file() {
+    fn clear_all_empties_file() {
         let (_dir, path) = temp_log();
         fs::write(&path, "first\nsecond\n").expect("log should be seedable");
 
-        clear_log(&path).expect("log should be clearable");
+        clear_all(&path).expect("log should be clearable");
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
         assert_eq!(contents, "");
