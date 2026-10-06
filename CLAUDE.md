@@ -49,6 +49,14 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 - `mod` declarations alphabetized.
 - Before finishing: `cargo test`, `cargo clippy --all-targets -- -D warnings`, `cargo fmt --check` must all be clean.
 
+## Versioning
+
+- `main` holds released versions. `dev` holds the next version.
+- After each merge of `dev` into `main`, bump `dev`'s patch version by one (0.1.1 → 0.1.2).
+- A proper release is `1.0.0`. After it is merged to `main`, `dev` starts at `1.0.1`.
+- Never change the version on `main` directly. It only changes through a merge from `dev`.
+- Version lives only in `Cargo.toml` `[package].version`.
+
 ## Planned (not yet done)
 
 - `LogStore` trait for storage (do not add until asked).
@@ -59,12 +67,13 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 Tests must assert current behavior. Do not change app behavior. 12 tests total (7 unit + 5 integration), not full coverage.
 
 1. **Done.** `src/lib.rs` holds all `pub mod` lines; `src/main.rs` imports `tally::...`. Dev-dependencies added: `tempfile` (auto-deleted temp dirs per test) and `tower` with `util` (`ServiceExt::oneshot`). The unused `delete` import in `routes.rs` was removed.
-2. **Being written now by the user.** Storage unit tests (7) in a `#[cfg(test)] mod tests` block at the bottom of `src/storage/log.rs`. Full code and explanations are in `UNIT_TESTS.md` (repo root). They were not compiled before handoff. Next session: check they are in, then run `cargo test`, `cargo clippy --all-targets -- -D warnings`, and `cargo fmt --check` and fix any issues. After that, `UNIT_TESTS.md` can be deleted (ask first).
-3. **Next: integration tests (5)** in `tests/routes.rs`, using `routes::router(state)` with `oneshot`. Present them the same way: a markdown file the user types from.
-   - Helpers: `const TOKEN: &str = "test-token"`, `fn app(file_name) -> Router`, `fn request(method, uri, token: Option<&str>)`, `async fn body_text(response)` using `axum::body::to_bytes`.
-   - `protected_routes_reject_missing_token`: table-driven loop over all 5 protected method+path pairs, each 401, with `"{method} {uri}"` in the assert message.
+2. **Done.** Storage unit tests (7) in a `#[cfg(test)] mod tests` block at the bottom of `src/storage/log.rs`, sharing a `temp_log()` helper. Redundant extras were removed. `UNIT_TESTS.md` was deleted. `Cargo.toml` sets `[lints.clippy] unwrap_used = "warn"`.
+3. **In progress: integration tests (5)** in `tests/routes.rs`, using `routes::router(state)` with `oneshot`. `INTEGRATION_TESTS.md` (repo root) holds the full verified file for the user to type from; delete it once the tests are typed and pass.
+   - Helpers: `const TOKEN: &str = "test-token"`, `const PROTECTED: [(Method, &str); 5]` (all protected method+path pairs), `fn temp_log() -> Result<(TempDir, String)>`, `fn app(file_name) -> Router`, `fn request(method, uri, token: Option<&str>)`, `async fn body_text(response)` using `axum::body::to_bytes`.
+   - Every test uses `temp_log()`, even ones that never reach storage, so a broken auth layer can't write a real file.
+   - `protected_routes_reject_missing_token`: loop over `PROTECTED`, each 401, with `"{method} {uri}"` in the assert message.
    - `protected_routes_reject_wrong_token`: same loop with `Bearer wrong-token`.
-   - `log_lifecycle_with_valid_token`: POST ×2 → GET /log (2 lines) → GET /log/last → DELETE /log/last (204) → GET /log (1 line) → DELETE /log (204) → GET /log (empty).
+   - `log_lifecycle_with_valid_token`: POST ×2 (save bodies as `first`/`second`) → GET /log == `"{first}\n{second}\n"` → GET /log/last == `second` → DELETE /log/last (204) → GET /log == `"{first}\n"` → DELETE /log (204) → GET /log (empty).
    - `last_entry_on_empty_log_returns_ok_with_empty_body`: 200 + empty body, with a comment that it will become 404.
    - `health_returns_ok_without_token`: 200 with no token.
 
