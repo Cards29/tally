@@ -22,10 +22,8 @@ pub async fn require_token(
         .and_then(|value| value.to_str().ok())
         .and_then(|value| value.strip_prefix("Bearer "));
 
-    let authorized = match token {
-        Some(token) => bool::from(token.as_bytes().ct_eq(state.auth_token.as_bytes())),
-        None => false,
-    };
+    let authorized =
+        token.is_some_and(|t| bool::from(t.as_bytes().ct_eq(state.auth_token.as_bytes())));
 
     if !authorized {
         return StatusCode::UNAUTHORIZED.into_response();

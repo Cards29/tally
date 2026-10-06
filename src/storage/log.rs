@@ -1,13 +1,18 @@
+use std::{
+    fs::{self, OpenOptions},
+    io::{self, Write},
+};
+
 use anyhow::{Context, Result};
 use chrono::{DateTime, Local};
-use std::fs::{self, OpenOptions};
-use std::io::{self, Write};
+
+const TIME_FORMAT: &str = "%a, %b %d %Y %H:%M:%S";
 
 /// Returns the current local time formatted as `Mon, Oct 06 2026 14:03:09`.
 fn current_time() -> String {
     let local_time: DateTime<Local> = Local::now();
 
-    local_time.format("%a, %b %d %Y %H:%M:%S").to_string()
+    local_time.format(TIME_FORMAT).to_string()
 }
 
 /// Appends the current local time as a new line, creating the file if missing.
@@ -21,9 +26,9 @@ pub fn log_time(file_name: &str) -> Result<String> {
         .append(true)
         .create(true)
         .open(file_name)
-        .with_context(|| format!("failed to open {}", file_name))?;
+        .with_context(|| format!("failed to open {file_name}"))?;
 
-    writeln!(file, "{}", entry).with_context(|| format!("failed to write to {}", file_name))?;
+    writeln!(file, "{entry}").with_context(|| format!("failed to write to {file_name}"))?;
     Ok(entry)
 }
 
@@ -32,7 +37,7 @@ pub fn log_time(file_name: &str) -> Result<String> {
 /// # Errors
 /// Returns an error if the file can't be written.
 pub fn clear_log(file_name: &str) -> Result<()> {
-    fs::write(file_name, "").with_context(|| "failed to clear the log")?;
+    fs::write(file_name, "").with_context(|| format!("failed to clear the log in {file_name}"))?;
     Ok(())
 }
 
@@ -49,13 +54,22 @@ pub fn read_log(file_name: &str) -> Result<String> {
     }
 }
 
+/// Splits the log into (everything before the last line, the last line).
+fn split_last_line(contents: &str) -> (&str, &str) {
+    let trimmed = contents.trim_end_matches('\n');
+    match trimmed.rfind('\n') {
+        Some(i) => (&trimmed[..=i], &trimmed[i + 1..]),
+        None => ("", trimmed),
+    }
+}
+
 /// Returns the last line of the log, or `""` if the log is empty.
 ///
 /// # Errors
 /// Returns an error if the log can't be read.
 pub fn last_entry(file_name: &str) -> Result<String> {
     let contents = read_log(file_name)?;
-    Ok(contents.lines().last().unwrap_or("").to_string())
+    Ok(split_last_line(&contents).1.to_string())
 }
 
 /// Removes the last line of the log. Does nothing if the log is empty.
@@ -64,19 +78,14 @@ pub fn last_entry(file_name: &str) -> Result<String> {
 /// Returns an error if the log can't be read or written.
 pub fn clear_last_entry(file_name: &str) -> Result<()> {
     let contents = read_log(file_name)?;
-    let trimmed = contents.trim_end_matches("\n");
-    let new_contents = match trimmed.rfind("\n") {
-        Some(i) => &trimmed[..=i],
-        None => "",
-    };
+    let new_contents = split_last_line(&contents).0;
+
     fs::write(file_name, new_contents)
         .with_context(|| format!("failed to write {file_name} after clearing last line"))
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use tempfile::TempDir;
 
     use super::*;
@@ -97,11 +106,33 @@ mod tests {
     }
 
     #[test]
+    fn current_time_matches_log_format() {
+        let entry = current_time();
+
+        chrono::NaiveDateTime::parse_from_str(&entry, "%a, %b %d %Y %H:%M:%S")
+            .expect("entry should parse with the log format");
+    }
+
+    #[test]
     fn read_log_returns_empty_when_file_missing() {
         let (_dir, path) = temp_log();
+
         let contents = read_log(&path).expect("missing log should be read as empty");
 
         assert_eq!(contents, "");
+    }
+
+    #[test]
+    fn read_log_errors_when_path_is_unreadable() {
+        let (_dir, path) = temp_log();
+        fs::create_dir(&path).expect("directory should be creatable at log path");
+
+        let result = read_log(&path);
+
+        assert!(
+            result.is_err(),
+            "reading a directory should be an error, not an empty log"
+        );
     }
 
     #[test]
@@ -112,15 +143,14 @@ mod tests {
         let second = log_time(&path).expect("second line should be written");
 
         let contents = fs::read_to_string(&path).expect("log file should be readable");
-
         assert_eq!(contents, format!("{first}\n{second}\n"));
     }
 
     #[test]
     fn last_entry_returns_final_line() {
         let (_dir, path) = temp_log();
-
         fs::write(&path, "first\nsecond\n").expect("log should be seedable");
+
         let contents = last_entry(&path).expect("last entry should be readable");
 
         assert_eq!(contents, "second");

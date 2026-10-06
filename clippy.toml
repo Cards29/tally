@@ -1,0 +1,3 @@
+disallowed-methods = [
+    { path = "anyhow::Context::context", reason = "use with_context for consistency" },
+]

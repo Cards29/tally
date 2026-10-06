@@ -1,0 +1,5 @@
+# main.rs only wires things together; it's not worth mutating
+exclude_globs = ["src/main.rs"]
+
+# StatusCode::default() is 200 OK, so this mutant behaves the same as the real code
+exclude_re = ["health\\.rs.*replace check -> StatusCode with Default"]
