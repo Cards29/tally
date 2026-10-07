@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["Result", "question mark operator", "panic", "unwrap", "expect"]
+---
+
 # `Result` and panics
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [Closures and `Option`](closures-and-option.md) · Next: [anyhow](anyhow.md) · [Index](../../README.md)
@@ -166,8 +171,9 @@ The reasoning: `unwrap()` says nothing about *why* it should be safe. `expect` f
 
 ## Quick revise
 
-- There are no exceptions. Recoverable errors use `Result<T, E>` (`Ok(T)` / `Err(E)`). Bugs use `panic!`.
-- A `Result` must be used. Handle it with `match` (guards like `Err(e) if ...` can test the error kind), with `?`, or with methods like `unwrap_or_else`.
-- `?`: return `Err` early, after converting it with `From`, or unwrap `Ok`. It only works in functions returning `Result` or `Option`.
-- `unwrap()` and `expect(msg)` panic on `Err` or `None`. In this repo: no `unwrap()`, `expect("... should ...")` in tests, and `?` in app code.
-- A test passes if it doesn't panic. `assert_eq!` panics on a mismatch.
+> [!TIP]
+> - There are no exceptions. Recoverable errors use `Result<T, E>` (`Ok(T)` / `Err(E)`). Bugs use `panic!`.
+> - A `Result` must be used. Handle it with `match` (guards like `Err(e) if ...` can test the error kind), with `?`, or with methods like `unwrap_or_else`.
+> - `?`: return `Err` early, after converting it with `From`, or unwrap `Ok`. It only works in functions returning `Result` or `Option`.
+> - `unwrap()` and `expect(msg)` panic on `Err` or `None`. In this repo: no `unwrap()`, `expect("... should ...")` in tests, and `?` in app code.
+> - A test passes if it doesn't panic. `assert_eq!` panics on a mismatch.

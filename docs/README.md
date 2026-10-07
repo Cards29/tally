@@ -1,3 +1,8 @@
+---
+tags: [index]
+aliases: ["Index", "Start here"]
+---
+
 # Tally: a Rust web backend, explained
 
 Tally is a small web server written in Rust. My phone sends it an HTTP request every time I press a button, and the server writes the current time into a log file. Other requests read the log back or delete entries.
@@ -12,6 +17,17 @@ It is small on purpose. With about 700 lines it still has every part a real back
 - **`concepts/`**: one doc per idea (ownership, traits, `Result`, middleware, ...). Each explains the idea from zero with small standalone examples, then links back to where this repo uses it.
 
 Every doc ends with a **Quick revise** section: a short summary for when you learned it once and need a refresher.
+
+## Reading in Obsidian
+
+These docs work in Obsidian and on GitHub alike: links are plain relative Markdown links, and boxes like "Quick revise" use `> [!TIP]` callouts, which both render.
+
+1. **Open:** choose "Open folder as vault" and pick `docs/`. Obsidian's settings folder (`docs/.obsidian/`) is gitignored.
+2. **Graph colors:** open Graph view, then Settings, then Groups. Add one group per query, for example `tag:#rust`, `tag:#web`, `tag:#tooling` and `tag:#file-doc`, each with its own color. File docs and the concepts they use then show up as clusters.
+3. **Local graph:** open any doc and run "Open local graph" from the command palette. It shows what links in and out of that doc.
+4. **Quick switcher (Ctrl+O):** every doc has aliases, so typing `auth.rs`, `Option`, `orphan rule` or `timing attack` jumps straight to the right doc.
+5. **Backlinks pane:** on a concept doc, it lists every file doc that uses that concept.
+6. **Tags pane:** browse docs by `#concept`, `#rust`, `#web`, `#tooling` or `#file-doc`.
 
 ## Reading path 1: follow the code
 

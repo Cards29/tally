@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["struct", "impl", "Self", "const", "newtype", "builder pattern"]
+---
+
 # Structs and `impl`
 
 > Concept · First seen in: [03. Config and state](../../files/03-config-and-state.md) · Prev: [Ownership, borrowing and strings](ownership-and-strings.md) · Next: [Traits and generics](traits-and-generics.md) · [Index](../../README.md)
@@ -180,11 +185,12 @@ This repo uses builders from std (`OpenOptions`) and from axum's `http` re-expor
 
 ## Quick revise
 
-- Named struct: `S { a, b }`. Tuple struct: `S(x)`, with fields `.0`, `.1`. Unit struct: `S;`. Every field must be set when creating one.
-- Field init shorthand: `{ port }`. Update syntax: `{ port: 1, ..old }`. Mutability is per variable, not per field.
-- `impl T { ... }`: no `self` = associated function, called `T::f()`. Methods take `&self`, `&mut self` or `self`.
-- `Self` = the type. `self` = the value.
-- Naming: `new`, `from_*`, `into_*` (consumes), `as_*` (cheap borrow), `to_*` (copy), `is_*`.
-- `const NAME: Type = value;`
-- Newtype `struct W(T);` lets you add traits to a foreign type and gives you type safety, at zero cost.
-- Builder: chain setters, then one final call (`open`, `body`).
+> [!TIP]
+> - Named struct: `S { a, b }`. Tuple struct: `S(x)`, with fields `.0`, `.1`. Unit struct: `S;`. Every field must be set when creating one.
+> - Field init shorthand: `{ port }`. Update syntax: `{ port: 1, ..old }`. Mutability is per variable, not per field.
+> - `impl T { ... }`: no `self` = associated function, called `T::f()`. Methods take `&self`, `&mut self` or `self`.
+> - `Self` = the type. `self` = the value.
+> - Naming: `new`, `from_*`, `into_*` (consumes), `as_*` (cheap borrow), `to_*` (copy), `is_*`.
+> - `const NAME: Type = value;`
+> - Newtype `struct W(T);` lets you add traits to a foreign type and gives you type safety, at zero cost.
+> - Builder: chain setters, then one final call (`open`, `body`).

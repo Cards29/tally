@@ -1,10 +1,15 @@
+---
+tags: [file-doc]
+aliases: ["error.rs", "AppError"]
+---
+
 # 07. Errors
 
 > Synced at commit `7e4f19b` · Prev: [06. Handlers](06-handlers.md) · Next: [08. Storage](08-storage-log.md) · [Index](../README.md)
 
 `src/error.rs` defines `AppError`: the bridge between anyhow errors (from storage) and HTTP responses (what axum sends back). It's short, but it uses the most trait machinery of any file in the repo.
 
-Read [Traits and generics](../concepts/rust/traits-and-generics.md) first. This file is its main real-world example. It also uses the newtype pattern from [Structs and `impl`](../concepts/rust/structs-and-impl.md#the-newtype-pattern), and `{:#}` from [anyhow](../concepts/rust/anyhow.md#printing-an-error).
+Read [Traits and generics](../concepts/rust/traits-and-generics.md) first. This file is its main real-world example. It also uses the newtype pattern from [Structs and `impl`](../concepts/rust/structs-and-impl.md) (section "The newtype pattern"), and `{:#}` from [anyhow](../concepts/rust/anyhow.md) (section "Printing an error").
 
 ---
 
@@ -157,8 +162,9 @@ fs::read_to_string fails (io::Error: Is a directory)
 
 ## Quick revise
 
-- `AppError(anyhow::Error)` is a newtype, so the orphan rule allows `impl IntoResponse for AppError`. Its field is private.
-- `into_response`: `eprintln!("{:#}", self.0)` logs the whole chain, then the client gets a bare 500 with an empty body. Details never leave the server.
-- `impl<E> From<E> for AppError where E: Into<anyhow::Error>` is a blanket impl, so `?` turns any std or anyhow error into an `AppError`.
-- `AppError` must not implement `std::error::Error`, or the blanket impl would conflict with `From<T> for T`.
-- Error path: io::Error, then context (anyhow), then `?` (AppError), then 500.
+> [!TIP]
+> - `AppError(anyhow::Error)` is a newtype, so the orphan rule allows `impl IntoResponse for AppError`. Its field is private.
+> - `into_response`: `eprintln!("{:#}", self.0)` logs the whole chain, then the client gets a bare 500 with an empty body. Details never leave the server.
+> - `impl<E> From<E> for AppError where E: Into<anyhow::Error>` is a blanket impl, so `?` turns any std or anyhow error into an `AppError`.
+> - `AppError` must not implement `std::error::Error`, or the blanket impl would conflict with `From<T> for T`.
+> - Error path: io::Error, then context (anyhow), then `?` (AppError), then 500.

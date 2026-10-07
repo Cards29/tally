@@ -1,3 +1,8 @@
+---
+tags: [concept, web]
+aliases: ["env vars", ".env", "dotenvy", "Render", "deploy"]
+---
+
 # Config and deployment
 
 > Concept · First seen in: [03. Config and state](../../files/03-config-and-state.md) · Prev: [Middleware and auth](middleware-and-auth.md) · Next: [Cargo and code checks](../tooling/cargo-and-checks.md) · [Index](../../README.md)
@@ -98,9 +103,10 @@ Render builds the app from git and runs it. In outline:
 
 ## Quick revise
 
-- Config goes in environment variables, not code. One binary works everywhere, and secrets stay out of git.
-- `env::var` returns `Result<String, _>`. Parse numbers yourself. Required: `?` with context. Optional: a default value.
-- Validate at startup (fail fast).
-- `.env` + `dotenvy` is for local dev. Real variables always win. Never commit `.env`.
-- Secrets: random, long, never logged, HTTPS only.
-- Render: builds from git, sets `PORT`, terminates HTTPS. Bind `0.0.0.0`. The free tier wipes the disk and runs in UTC, so set `TZ`.
+> [!TIP]
+> - Config goes in environment variables, not code. One binary works everywhere, and secrets stay out of git.
+> - `env::var` returns `Result<String, _>`. Parse numbers yourself. Required: `?` with context. Optional: a default value.
+> - Validate at startup (fail fast).
+> - `.env` + `dotenvy` is for local dev. Real variables always win. Never commit `.env`.
+> - Secrets: random, long, never logged, HTTPS only.
+> - Render: builds from git, sets `PORT`, terminates HTTPS. Bind `0.0.0.0`. The free tier wipes the disk and runs in UTC, so set `TZ`.

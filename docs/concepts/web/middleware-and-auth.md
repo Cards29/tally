@@ -1,3 +1,8 @@
+---
+tags: [concept, web]
+aliases: ["middleware", "bearer token", "timing attack", "route_layer", "subtle"]
+---
+
 # Middleware and auth
 
 > Concept · First seen in: [04. Routes](../../files/04-routes.md), used in [05. Auth middleware](../../files/05-middleware-auth.md) · Prev: [axum](axum.md) · Next: [Config and deployment](config-and-deploy.md) · [Index](../../README.md)
@@ -119,9 +124,10 @@ Over the internet, network noise makes this attack hard. But constant-time compa
 
 ## Quick revise
 
-- Middleware wraps handlers like an onion. It can change the request, stop early with its own response, or change the response.
-- `from_fn_with_state(state, f)`, where `f(State, ..., Request, Next) -> Response`. Call `next.run(request).await` to continue inward.
-- `route_layer` runs only for matched routes, so unknown paths still get 404. `layer` also wraps the fallback. Both only wrap routes added before them.
-- Authentication = who. Authorization = what they may do. Tally only does authentication.
-- Bearer token: whoever holds it gets in. HTTPS only, long and random, never in URLs.
-- `==` leaks timing. Use `subtle`'s `ct_eq`, which returns a `Choice`, then `bool::from` it.
+> [!TIP]
+> - Middleware wraps handlers like an onion. It can change the request, stop early with its own response, or change the response.
+> - `from_fn_with_state(state, f)`, where `f(State, ..., Request, Next) -> Response`. Call `next.run(request).await` to continue inward.
+> - `route_layer` runs only for matched routes, so unknown paths still get 404. `layer` also wraps the fallback. Both only wrap routes added before them.
+> - Authentication = who. Authorization = what they may do. Tally only does authentication.
+> - Bearer token: whoever holds it gets in. HTTPS only, long and random, never in URLs.
+> - `==` leaks timing. Use `subtle`'s `ct_eq`, which returns a `Choice`, then `bool::from` it.

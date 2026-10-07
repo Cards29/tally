@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["macro", "format!", "attribute", "derive", "doc comments", "cfg"]
+---
+
 # Macros and attributes
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [Pattern matching](pattern-matching.md) · Next: [async and tokio](async-and-tokio.md) · [Index](../../README.md)
@@ -129,8 +134,9 @@ Run `cargo doc --open` to see this crate's docs rendered as a website.
 
 ## Quick revise
 
-- `name!(...)` is a macro: code that generates code at compile time. Macros can take any number of arguments and check format strings.
-- Formatting: `{x}` inline (plain names only), `{}` uses Display, `{:?}` uses Debug, `{:#}` is the alternate form, `{{` prints a literal brace.
-- `#[attr]` applies to the next item. `#![attr]` applies to the enclosing item.
-- Key attributes: `derive`, `tokio::main`, `test`, `cfg(test)`, `track_caller`, `allow`.
-- `///` documents the next item, `//!` the enclosing one. They're Markdown with `# Errors`, `# Panics` and `# Examples` sections, rendered by `cargo doc`.
+> [!TIP]
+> - `name!(...)` is a macro: code that generates code at compile time. Macros can take any number of arguments and check format strings.
+> - Formatting: `{x}` inline (plain names only), `{}` uses Display, `{:?}` uses Debug, `{:#}` is the alternate form, `{{` prints a literal brace.
+> - `#[attr]` applies to the next item. `#![attr]` applies to the enclosing item.
+> - Key attributes: `derive`, `tokio::main`, `test`, `cfg(test)`, `track_caller`, `allow`.
+> - `///` documents the next item, `//!` the enclosing one. They're Markdown with `# Errors`, `# Panics` and `# Examples` sections, rendered by `cargo doc`.

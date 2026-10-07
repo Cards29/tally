@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["mod", "pub", "use", "crate", "visibility"]
+---
+
 # Modules and crates
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Next: [Ownership, borrowing and strings](ownership-and-strings.md) · [Index](../../README.md)
@@ -147,8 +152,9 @@ use super::*;                           // everything from the parent module (co
 
 ## Quick revise
 
-- Crate: one unit of compilation. A binary crate has `main.rs`; a library crate has `lib.rs`. A binary uses its own library as `package_name::`.
-- Tests in `tests/` can import the library but not the binary, so keep logic in `lib.rs`.
-- `mod x;` loads `x.rs`. Inside `x.rs`, `mod y;` loads `x/y.rs`. Files without a `mod` line are not compiled.
-- Everything is private by default. `pub`, `pub(crate)` and `pub(super)` open it up. Every module on the path must be visible.
-- Paths: `crate::`, `super::`, `self::`, or a crate's name. `use` shortens a path, `as` renames, `{}` groups.
+> [!TIP]
+> - Crate: one unit of compilation. A binary crate has `main.rs`; a library crate has `lib.rs`. A binary uses its own library as `package_name::`.
+> - Tests in `tests/` can import the library but not the binary, so keep logic in `lib.rs`.
+> - `mod x;` loads `x.rs`. Inside `x.rs`, `mod y;` loads `x/y.rs`. Files without a `mod` line are not compiled.
+> - Everything is private by default. `pub`, `pub(crate)` and `pub(super)` open it up. Every module on the path must be visible.
+> - Paths: `crate::`, `super::`, `self::`, or a crate's name. `use` shortens a path, `as` renames, `{}` groups.

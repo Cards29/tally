@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["storage/log.rs", "split_last_line"]
+---
+
 # 08. Storage
 
 > Synced at commit `7e4f19b` · Prev: [07. Errors](07-error.md) · Next: [09. Integration tests](09-tests-routes.md) · [Index](../README.md)
@@ -18,7 +23,8 @@ New concept in this doc:
 
 Already covered, and used heavily here: [pattern matching](../concepts/rust/pattern-matching.md) (the `match` guard, tuple destructuring), [`String` vs `&str` and lifetimes](../concepts/rust/ownership-and-strings.md), [anyhow](../concepts/rust/anyhow.md), [the builder pattern and `const`](../concepts/rust/structs-and-impl.md).
 
-> **Blocking I/O:** these functions use `std::fs`, which blocks the thread, and they're called from async handlers. That breaks the "don't block in async" rule, on purpose: the files are tiny and there's one user. See [async and tokio](../concepts/rust/async-and-tokio.md#this-repos-choice).
+> [!NOTE]
+> **Blocking I/O:** these functions use `std::fs`, which blocks the thread, and they're called from async handlers. That breaks the "don't block in async" rule, on purpose: the files are tiny and there's one user. See [async and tokio](../concepts/rust/async-and-tokio.md), section "This repo's choice".
 
 ---
 
@@ -210,7 +216,8 @@ pub fn clear_last(file_name: &str) -> Result<()> {
 - The last expression has **no `?` and no `Ok(())`**. `fs::write(...).with_context(...)` already has type `anyhow::Result<()>`, which is exactly the return type, so it's returned as it is.
 - On an empty or missing log, `rest` is `""`, so it writes an empty file. "Does nothing" here means no entries get removed, though a missing file gets created.
 
-**Known limitation:** this is a non-atomic read-then-write. If a `POST /log` lands between the read and the write, that new entry is lost. If the process crashes mid-write, the file can end up truncated. The plan is to fix this with the `LogStore` work, for example with a mutex.
+> [!WARNING]
+> **Known limitation:** this is a non-atomic read-then-write. If a `POST /log` lands between the read and the write, that new entry is lost. If the process crashes mid-write, the file can end up truncated. The plan is to fix this with the `LogStore` work, for example with a mutex.
 
 ---
 
@@ -302,10 +309,11 @@ These 9 tests, together with the integration tests, leave `cargo mutants` with *
 
 ## Quick revise
 
-- Storage is a plain text file, one `%a, %b %d %Y %H:%M:%S` timestamp per line. It uses blocking `std::fs`, and knows nothing about HTTP.
-- `use io::Write` is needed for `writeln!`. `OpenOptions::new().append(true).create(true).open(...)`. Files close on drop (RAII).
-- `show_log`: a missing file (`NotFound` guard) is an empty log. Any other error gets context.
-- `split_last_line`: `trim_end_matches('\n')`, then `rfind('\n').map_or(0, |i| i + 1)`, then `split_at`. It returns borrowed slices. `show_last` and `clear_last` share it.
-- `show_last` returns `last.to_string()`, because the borrow can't outlive `contents`.
-- `clear_last` returns `fs::write(...).with_context(...)` directly. It's a non-atomic read-then-write (a known race).
-- Tests: `#[cfg(test)] mod tests` + `use super::*`. `temp_log()` returns `(TempDir, path)`, which you keep alive as `_dir`. Arrange/act/assert. Seed known text. Never assert exact times.
+> [!TIP]
+> - Storage is a plain text file, one `%a, %b %d %Y %H:%M:%S` timestamp per line. It uses blocking `std::fs`, and knows nothing about HTTP.
+> - `use io::Write` is needed for `writeln!`. `OpenOptions::new().append(true).create(true).open(...)`. Files close on drop (RAII).
+> - `show_log`: a missing file (`NotFound` guard) is an empty log. Any other error gets context.
+> - `split_last_line`: `trim_end_matches('\n')`, then `rfind('\n').map_or(0, |i| i + 1)`, then `split_at`. It returns borrowed slices. `show_last` and `clear_last` share it.
+> - `show_last` returns `last.to_string()`, because the borrow can't outlive `contents`.
+> - `clear_last` returns `fs::write(...).with_context(...)` directly. It's a non-atomic read-then-write (a known race).
+> - Tests: `#[cfg(test)] mod tests` + `use super::*`. `temp_log()` returns `(TempDir, path)`, which you keep alive as `_dir`. Arrange/act/assert. Seed known text. Never assert exact times.

@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["closure", "Option", "Some", "None", "and_then", "map_or"]
+---
+
 # Closures and `Option`
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [Traits and generics](traits-and-generics.md) · Next: [`Result` and panics](result-and-panics.md) · [Index](../../README.md)
@@ -156,8 +161,9 @@ let start = trimmed.rfind('\n').map_or(0, |i| i + 1);
 
 ## Quick revise
 
-- Closure: `|args| body`. It can capture surrounding variables by `&`, by `&mut`, or by `move`. The matching traits are `Fn`, `FnMut`, `FnOnce`.
-- Pass a closure to make work lazy: it only runs when needed (`with_context`, `unwrap_or_else`).
-- `Option<T>` is `Some(T)` or `None`. There's no null. The compiler forces you to handle `None`.
-- To get the value out: `match`, `if let`, `unwrap_or`, `expect`.
-- `map` transforms the inside. `and_then` chains steps that can fail. `map_or` gives a default. `is_some_and` tests the inside. `.ok()` turns a `Result` into an `Option`.
+> [!TIP]
+> - Closure: `|args| body`. It can capture surrounding variables by `&`, by `&mut`, or by `move`. The matching traits are `Fn`, `FnMut`, `FnOnce`.
+> - Pass a closure to make work lazy: it only runs when needed (`with_context`, `unwrap_or_else`).
+> - `Option<T>` is `Some(T)` or `None`. There's no null. The compiler forces you to handle `None`.
+> - To get the value out: `match`, `if let`, `unwrap_or`, `expect`.
+> - `map` transforms the inside. `and_then` chains steps that can fail. `map_or` gives a default. `is_some_and` tests the inside. `.ok()` turns a `Result` into an `Option`.

@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["auth.rs", "require_token"]
+---
+
 # 05. Auth middleware
 
 > Synced at commit `7e4f19b` · Prev: [04. Routes](04-routes.md) · Next: [06. Handlers](06-handlers.md) · [Index](../README.md)
@@ -141,7 +146,7 @@ From the inside out:
 3. `bool::from(choice)` converts the `Choice` into a normal `bool`.
 4. `token.is_some_and(|t| ...)`: if there's no token, the result is `false`. If there is one, it's whatever the closure returns.
 
-So `authorized` is `true` only if a token was sent **and** it matches. Why `ct_eq` instead of `==`? A plain `==` stops at the first wrong byte, so the response time would leak how many leading bytes were right. See [timing attacks](../concepts/web/middleware-and-auth.md#timing-attacks).
+So `authorized` is `true` only if a token was sent **and** it matches. Why `ct_eq` instead of `==`? A plain `==` stops at the first wrong byte, so the response time would leak how many leading bytes were right. See [Middleware and auth](../concepts/web/middleware-and-auth.md), section "Timing attacks".
 
 ---
 
@@ -181,9 +186,10 @@ Authorized, so call the rest of the stack: the actual handler. `request` is **mo
 
 ## Quick revise
 
-- Middleware arguments go in this order: `State(state): State<AppState>`, then `request: Request`, then `next: Next`. It returns a `Response`.
-- `State(state)` in the parameter is a pattern that unwraps the extractor.
-- The token comes from an `Option` chain: `headers().get(AUTHORIZATION)`, then `to_str().ok()`, then `strip_prefix("Bearer ")`. Any `None` means no token.
-- `is_some_and` + `ct_eq` + `bool::from` = present **and** equal, compared in constant time.
-- Guard clause: `if !authorized { return 401 }`. Otherwise `next.run(request).await` runs the handler.
-- Header constants (`header::AUTHORIZATION`) avoid typos in header names.
+> [!TIP]
+> - Middleware arguments go in this order: `State(state): State<AppState>`, then `request: Request`, then `next: Next`. It returns a `Response`.
+> - `State(state)` in the parameter is a pattern that unwraps the extractor.
+> - The token comes from an `Option` chain: `headers().get(AUTHORIZATION)`, then `to_str().ok()`, then `strip_prefix("Bearer ")`. Any `None` means no token.
+> - `is_some_and` + `ct_eq` + `bool::from` = present **and** equal, compared in constant time.
+> - Guard clause: `if !authorized { return 401 }`. Otherwise `next.run(request).await` runs the handler.
+> - Header constants (`header::AUTHORIZATION`) avoid typos in header names.

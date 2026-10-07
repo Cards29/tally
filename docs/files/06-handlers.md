@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["health.rs", "handlers/log.rs"]
+---
+
 # 06. Handlers
 
 > Synced at commit `7e4f19b` · Prev: [05. Auth middleware](05-middleware-auth.md) · Next: [07. Errors](07-error.md) · [Index](../README.md)
@@ -9,7 +14,7 @@ Handlers are the functions the router calls. They are deliberately **thin**: tak
 | `src/handlers/health.rs` | `check` |
 | `src/handlers/log.rs` | `add_entry`, `show_log`, `show_last`, `clear_last`, `clear_all` |
 
-No new concept docs here. These files put [axum](../concepts/web/axum.md) handlers, [pattern matching](../concepts/rust/pattern-matching.md), and [`?` with `From`](../concepts/rust/result-and-panics.md#the--operator) to work together.
+No new concept docs here. These files put [axum](../concepts/web/axum.md) handlers, [pattern matching](../concepts/rust/pattern-matching.md), and `?` with `From` (see [`Result` and panics](../concepts/rust/result-and-panics.md), section "The `?` operator") to work together.
 
 ---
 
@@ -145,10 +150,11 @@ Because storage knows nothing about HTTP, it can be unit-tested without a server
 
 ## Quick revise
 
-- Handlers are thin: extract, call storage, map the result to HTTP. No file logic.
-- `health::check` returns `StatusCode::OK`, and doesn't touch storage.
-- `storage::log as store` avoids the `log`/`log` name clash. Handler names match storage function names.
-- `Result<String, AppError>`: `Ok` gives 200 + text, `Err` gives 500 + an empty body.
-- `Ok(store::f(&state.file_name)?)`: `?` converts `anyhow::Error` into `AppError` through `From`. Return values are not converted automatically.
-- DELETE routes return `StatusCode::NO_CONTENT` (204).
-- `GET /log/last` on an empty log currently returns 200 + an empty body. 404 is planned.
+> [!TIP]
+> - Handlers are thin: extract, call storage, map the result to HTTP. No file logic.
+> - `health::check` returns `StatusCode::OK`, and doesn't touch storage.
+> - `storage::log as store` avoids the `log`/`log` name clash. Handler names match storage function names.
+> - `Result<String, AppError>`: `Ok` gives 200 + text, `Err` gives 500 + an empty body.
+> - `Ok(store::f(&state.file_name)?)`: `?` converts `anyhow::Error` into `AppError` through `From`. Return values are not converted automatically.
+> - DELETE routes return `StatusCode::NO_CONTENT` (204).
+> - `GET /log/last` on an empty log currently returns 200 + an empty body. 404 is planned.

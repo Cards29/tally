@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["ownership", "borrowing", "lifetimes", "String vs &str", "shadowing", "move", "clone"]
+---
+
 # Ownership, borrowing and strings
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [Modules and crates](modules.md) · Next: [Structs and `impl`](structs-and-impl.md) · [Index](../../README.md)
@@ -199,9 +204,10 @@ This is not mutation. These are two different variables, and the type can change
 
 ## Quick revise
 
-- Each value has one owner, and is dropped when the owner goes out of scope. There's no GC.
-- Assigning or passing a value **moves** it, and the old name becomes unusable. Small types are `Copy`. Use `.clone()` for an explicit deep copy.
-- `&T`: shared, read-only borrow. `&mut T`: exclusive borrow. Many `&` **or** one `&mut`, never both.
-- Lifetimes stop references from outliving their data. They're usually elided. `'static` means valid for the whole program.
-- `String` is owned and growable. `&str` is a borrowed view. Take `&str` as a parameter; store or return `String`. `&String` turns into `&str` automatically.
-- Shadowing: `let x` again makes a new variable, and its type can change.
+> [!TIP]
+> - Each value has one owner, and is dropped when the owner goes out of scope. There's no GC.
+> - Assigning or passing a value **moves** it, and the old name becomes unusable. Small types are `Copy`. Use `.clone()` for an explicit deep copy.
+> - `&T`: shared, read-only borrow. `&mut T`: exclusive borrow. Many `&` **or** one `&mut`, never both.
+> - Lifetimes stop references from outliving their data. They're usually elided. `'static` means valid for the whole program.
+> - `String` is owned and growable. `&str` is a borrowed view. Take `&str` as a parameter; store or return `String`. `&String` turns into `&str` automatically.
+> - Shadowing: `let x` again makes a new variable, and its type can change.

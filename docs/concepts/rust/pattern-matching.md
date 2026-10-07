@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["match", "if let", "let else", "destructuring", "match guard"]
+---
+
 # Pattern matching
 
 > Concept · First seen in: [05. Auth middleware](../../files/05-middleware-auth.md) · Prev: [anyhow](anyhow.md) · Next: [Macros and attributes](macros-and-attributes.md) · [Index](../../README.md)
@@ -159,9 +164,10 @@ if matches!(e.kind(), io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied)
 
 ## Quick revise
 
-- `match` is an expression. Arms run top to bottom. It must be exhaustive. Use `|` for "or", `a..=b` for ranges, `_` as the catch-all.
-- Guards: `Err(e) if cond =>`. Put specific arms before general ones.
-- Destructure in `let`, function parameters, `for`, and closures: `(a, b)`, `Point { x, .. }`, `State(state)`.
-- `_` drops right away. `_name` lives until the end of the scope. Keep guards like `TempDir` in `_dir`.
-- `if let Some(x) = ...` handles one case. `let Some(x) = ... else { return ... };` binds or exits. `matches!` gives a bool.
-- Irrefutable patterns go in `let` and parameters. Refutable ones need `match`, `if let`, or `let ... else`.
+> [!TIP]
+> - `match` is an expression. Arms run top to bottom. It must be exhaustive. Use `|` for "or", `a..=b` for ranges, `_` as the catch-all.
+> - Guards: `Err(e) if cond =>`. Put specific arms before general ones.
+> - Destructure in `let`, function parameters, `for`, and closures: `(a, b)`, `Point { x, .. }`, `State(state)`.
+> - `_` drops right away. `_name` lives until the end of the scope. Keep guards like `TempDir` in `_dir`.
+> - `if let Some(x) = ...` handles one case. `let Some(x) = ... else { return ... };` binds or exits. `matches!` gives a bool.
+> - Irrefutable patterns go in `let` and parameters. Refutable ones need `match`, `if let`, or `let ... else`.

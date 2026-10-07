@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["test", "unit test", "integration test", "assert_eq", "tokio::test", "TempDir"]
+---
+
 # Testing
 
 > Concept · First seen in: [08. Storage](../../files/08-storage-log.md) · Prev: [async and tokio](async-and-tokio.md) · Next: [HTTP basics](../web/http-basics.md) · [Index](../../README.md)
@@ -139,7 +144,7 @@ Output from passing tests is captured (hidden) by default. Failing tests show th
 
 ## Mutation testing
 
-`cargo mutants` checks the tests themselves: it changes the code and expects some test to fail. See [Cargo and code checks](../tooling/cargo-and-checks.md#cargo-mutants-mutation-testing).
+`cargo mutants` checks the tests themselves: it changes the code and expects some test to fail. See [Cargo and code checks](../tooling/cargo-and-checks.md), section "`cargo mutants` (mutation testing)".
 
 ## Common errors
 
@@ -156,11 +161,12 @@ Output from passing tests is captured (hidden) by default. Failing tests show th
 
 ## Quick revise
 
-- `#[test] fn name()`: it passes if it doesn't panic. Tests run in parallel, so isolate them.
-- `assert!`, `assert_eq!(actual, expected)`, `assert_ne!`, and `expect("x should y")`. Never `unwrap`.
-- Unit tests: `#[cfg(test)] mod tests { use super::*; }`. They can see private items.
-- Integration tests: `tests/*.rs`. Each file is a separate crate, sees only `pub` items, and needs `lib.rs`.
-- Async: `#[tokio::test]`.
-- `TempDir` is deleted on drop, so bind it as `_dir`. `#[track_caller]` makes helper panics point at the caller.
-- Filter tests with `cargo test name`. Show output with `-- --nocapture`.
-- Style: behavior names, arrange/act/assert, seeded data, no exact times, literal format strings, always check the status.
+> [!TIP]
+> - `#[test] fn name()`: it passes if it doesn't panic. Tests run in parallel, so isolate them.
+> - `assert!`, `assert_eq!(actual, expected)`, `assert_ne!`, and `expect("x should y")`. Never `unwrap`.
+> - Unit tests: `#[cfg(test)] mod tests { use super::*; }`. They can see private items.
+> - Integration tests: `tests/*.rs`. Each file is a separate crate, sees only `pub` items, and needs `lib.rs`.
+> - Async: `#[tokio::test]`.
+> - `TempDir` is deleted on drop, so bind it as `_dir`. `#[track_caller]` makes helper panics point at the caller.
+> - Filter tests with `cargo test name`. Show output with `-- --nocapture`.
+> - Style: behavior names, arrange/act/assert, seeded data, no exact times, literal format strings, always check the status.

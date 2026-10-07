@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["with_context", "error chain", "anyhow::Result"]
+---
+
 # anyhow
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [`Result` and panics](result-and-panics.md) · Next: [Pattern matching](pattern-matching.md) · [Index](../../README.md)
@@ -114,9 +119,10 @@ Tally is an app, and it only ever logs errors and returns 500, so anyhow fits.
 
 ## Quick revise
 
-- `anyhow::Error` holds any error. `anyhow::Result<T>` = `Result<T, anyhow::Error>`. `?` converts errors into it automatically.
-- `use anyhow::Context;` adds `.with_context(|| msg)` to `Result` and `Option`. It wraps the error in a message, building a chain.
-- `with_context` is lazy (it takes a closure). This repo bans `.context`.
-- `anyhow!("...")` creates an error. `bail!("...")` returns one.
-- Print with `{:#}` for a one-line chain, or `{:?}` for multiple lines.
-- anyhow is for apps. thiserror is for libraries whose callers need to match on errors.
+> [!TIP]
+> - `anyhow::Error` holds any error. `anyhow::Result<T>` = `Result<T, anyhow::Error>`. `?` converts errors into it automatically.
+> - `use anyhow::Context;` adds `.with_context(|| msg)` to `Result` and `Option`. It wraps the error in a message, building a chain.
+> - `with_context` is lazy (it takes a closure). This repo bans `.context`.
+> - `anyhow!("...")` creates an error. `bail!("...")` returns one.
+> - Print with `{:#}` for a one-line chain, or `{:?}` for multiple lines.
+> - anyhow is for apps. thiserror is for libraries whose callers need to match on errors.

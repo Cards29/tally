@@ -1,10 +1,15 @@
+---
+tags: [file-doc]
+aliases: ["tests/routes.rs", "oneshot"]
+---
+
 # 09. Integration tests
 
 > Synced at commit `7e4f19b` · Prev: [08. Storage](08-storage-log.md) · [Index](../README.md)
 
 `tests/routes.rs` tests the **whole app** through the router: auth, routing, handlers, storage and errors together. It doesn't open a network port. Requests go straight into the `Router` as function calls.
 
-Background: [Testing](../concepts/rust/testing.md), [axum](../concepts/web/axum.md#testing-without-a-network), [HTTP basics](../concepts/web/http-basics.md).
+Background: [Testing](../concepts/rust/testing.md), [axum](../concepts/web/axum.md) (section "Testing without a network"), [HTTP basics](../concepts/web/http-basics.md).
 
 ---
 
@@ -67,7 +72,7 @@ const PROTECTED: [(Method, &str); 5] = [
 fn temp_log() -> (TempDir, String) { ... }
 ```
 
-The same helper as in the storage unit tests (see [doc 08](08-storage-log.md#the-helper)). Integration tests are a separate crate, so they can't reuse the private one from `src/`. It's duplicated on purpose.
+The same helper as in the storage unit tests (see [doc 08](08-storage-log.md), section "The helper"). Integration tests are a separate crate, so they can't reuse the private one from `src/`. It's duplicated on purpose.
 
 ### `app`
 
@@ -262,10 +267,11 @@ async fn storage_error_returns_internal_server_error() {
 
 ## Quick revise
 
-- Integration tests use the app as a library (`tally::`). `ServiceExt::oneshot` sends a request straight into a cloned `Router`, with no network.
-- `send(&app, method, uri, Option<token>) -> (StatusCode, String)`: build the request with a builder, `oneshot`, save the status, then `to_bytes` + `from_utf8` for the body.
-- `PROTECTED` lists every guarded `(Method, path)`. Auth tests loop over it with no token and with a wrong token, and expect 401.
-- The lifecycle test uses the returned entries instead of guessed times, shadows `(status, log)` at each step, and always asserts the status.
-- The empty `/log/last` test pins the current 200 + empty body (404 is planned).
-- A directory at the log path forces a storage error, which must give 500 + an empty body (no leaked details).
-- Every test uses `temp_log()` with `_dir` kept alive, even tests that never touch storage.
+> [!TIP]
+> - Integration tests use the app as a library (`tally::`). `ServiceExt::oneshot` sends a request straight into a cloned `Router`, with no network.
+> - `send(&app, method, uri, Option<token>) -> (StatusCode, String)`: build the request with a builder, `oneshot`, save the status, then `to_bytes` + `from_utf8` for the body.
+> - `PROTECTED` lists every guarded `(Method, path)`. Auth tests loop over it with no token and with a wrong token, and expect 401.
+> - The lifecycle test uses the returned entries instead of guessed times, shadows `(status, log)` at each step, and always asserts the status.
+> - The empty `/log/last` test pins the current 200 + empty body (404 is planned).
+> - A directory at the log path forces a storage error, which must give 500 + an empty body (no leaked details).
+> - Every test uses `temp_log()` with `_dir` kept alive, even tests that never touch storage.

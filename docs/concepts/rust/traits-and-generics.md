@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["trait", "generics", "derive", "From", "Into", "orphan rule", "blanket impl"]
+---
+
 # Traits and generics
 
 > Concept · First seen in: [03. Config and state](../../files/03-config-and-state.md) (`derive(Clone)`), then fully in [07. Errors](../../files/07-error.md) · Prev: [Structs and `impl`](structs-and-impl.md) · Next: [Closures and `Option`](closures-and-option.md) · [Index](../../README.md)
@@ -202,9 +207,10 @@ The rule stops two crates from writing conflicting impls for the same pair. The 
 
 ## Quick revise
 
-- A trait is a named set of methods. `impl Trait for Type`. Methods can be required or have a default body.
-- You can only call a trait's methods when the trait is imported (extension traits: `Context`, `Write`, `ServiceExt`).
-- `#[derive(Clone, Debug, ...)]` generates the impl, field by field.
-- Generics: `<T: Bound>`, or `where T: A + B`, or `impl Trait`. They're compiled per type (monomorphization), so there's no runtime cost.
-- Blanket impl: `impl<T: X> Y for T`. Implement `From` and get `Into` free. `?` uses `From` to convert errors.
-- Orphan rule: either the trait or the type must be yours. Use a newtype to get around it.
+> [!TIP]
+> - A trait is a named set of methods. `impl Trait for Type`. Methods can be required or have a default body.
+> - You can only call a trait's methods when the trait is imported (extension traits: `Context`, `Write`, `ServiceExt`).
+> - `#[derive(Clone, Debug, ...)]` generates the impl, field by field.
+> - Generics: `<T: Bound>`, or `where T: A + B`, or `impl Trait`. They're compiled per type (monomorphization), so there's no runtime cost.
+> - Blanket impl: `impl<T: X> Y for T`. Implement `From` and get `Into` free. `?` uses `From` to convert errors.
+> - Orphan rule: either the trait or the type must be yours. Use a newtype to get around it.

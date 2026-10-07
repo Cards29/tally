@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["main.rs", "lib.rs", "handlers.rs", "middleware.rs", "storage.rs"]
+---
+
 # 02. main.rs and the module tree
 
 > Synced at commit `7e4f19b` · Prev: [01. Cargo and tooling config](01-cargo-and-tooling.md) · Next: [03. Config and state](03-config-and-state.md) · [Index](../README.md)
@@ -276,13 +281,14 @@ The last expression in a function, written without a `;`, is its return value. `
 
 ## Quick revise
 
-- One package, two crates: `lib.rs` (library `tally`, all the code) and `main.rs` (binary, uses `tally::`). Tests can only import the library.
-- `mod x;` loads `x.rs`. In `x.rs`, `mod y;` loads `x/y.rs`. A file isn't compiled unless some `mod` line names it. `pub` makes it visible outside.
-- `//!` documents the enclosing item. `///` documents the next item.
-- `#[tokio::main]` starts the async runtime so `main` can be `async`.
-- `main` returns `anyhow::Result<()>`. An `Err` gets printed and the process exits with code 1.
-- `?` means: return the error now, or unwrap the `Ok` value. `with_context(|| ...)` adds a message, and the closure runs only on error.
-- Trait methods need the trait in scope (`use anyhow::Context`).
-- Inline format arguments only take plain variable names, not `config.port`.
-- `config.state` moves out of the struct. `&addr` borrows.
-- `axum::serve(...).await` runs forever.
+> [!TIP]
+> - One package, two crates: `lib.rs` (library `tally`, all the code) and `main.rs` (binary, uses `tally::`). Tests can only import the library.
+> - `mod x;` loads `x.rs`. In `x.rs`, `mod y;` loads `x/y.rs`. A file isn't compiled unless some `mod` line names it. `pub` makes it visible outside.
+> - `//!` documents the enclosing item. `///` documents the next item.
+> - `#[tokio::main]` starts the async runtime so `main` can be `async`.
+> - `main` returns `anyhow::Result<()>`. An `Err` gets printed and the process exits with code 1.
+> - `?` means: return the error now, or unwrap the `Ok` value. `with_context(|| ...)` adds a message, and the closure runs only on error.
+> - Trait methods need the trait in scope (`use anyhow::Context`).
+> - Inline format arguments only take plain variable names, not `config.port`.
+> - `config.state` moves out of the struct. `&addr` borrows.
+> - `axum::serve(...).await` runs forever.

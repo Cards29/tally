@@ -1,3 +1,8 @@
+---
+tags: [concept, web]
+aliases: ["HTTP", "status codes", "methods", "headers", "REST"]
+---
+
 # HTTP basics
 
 > Concept · First seen in: [04. Routes](../../files/04-routes.md) · Prev: [Testing](../rust/testing.md) · Next: [axum](axum.md) · [Index](../../README.md)
@@ -134,9 +139,10 @@ curl -iL localhost:3000/                                       # -L: follow redi
 
 ## Quick revise
 
-- Request: method + path + headers + optional body. Response: status + headers + optional body. It's text over TCP. HTTPS adds TLS.
-- GET reads (safe, so it must never change data). POST creates or acts. DELETE removes. PUT and DELETE are meant to be idempotent.
-- REST: the path is the resource, the method is the action.
-- 2xx success (200, 204). 3xx redirect (307 is temporary and keeps the method). 4xx client's fault (401, 404, 405). 5xx server's fault (500).
-- 401 = not authenticated. 403 = authenticated but not allowed.
-- `Authorization: Bearer <token>` carries the credential. `Location` carries the redirect target.
+> [!TIP]
+> - Request: method + path + headers + optional body. Response: status + headers + optional body. It's text over TCP. HTTPS adds TLS.
+> - GET reads (safe, so it must never change data). POST creates or acts. DELETE removes. PUT and DELETE are meant to be idempotent.
+> - REST: the path is the resource, the method is the action.
+> - 2xx success (200, 204). 3xx redirect (307 is temporary and keeps the method). 4xx client's fault (401, 404, 405). 5xx server's fault (500).
+> - 401 = not authenticated. 403 = authenticated but not allowed.
+> - `Authorization: Bearer <token>` carries the credential. `Location` carries the redirect target.

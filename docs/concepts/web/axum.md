@@ -1,3 +1,8 @@
+---
+tags: [concept, web]
+aliases: ["Router", "handler", "extractor", "State", "IntoResponse"]
+---
+
 # axum
 
 > Concept · First seen in: [04. Routes](../../files/04-routes.md) · Prev: [HTTP basics](http-basics.md) · Next: [Middleware and auth](middleware-and-auth.md) · [Index](../../README.md)
@@ -131,11 +136,12 @@ No port, no HTTP client, and it's fast. See [09. Integration tests](../../files/
 
 ## Quick revise
 
-- axum = routing + typed extractors + `IntoResponse`, on top of hyper, tower and tokio.
-- `Router::new().route("/p", get(a).post(b))`. `merge`, `nest`. Unknown path gives 404. Wrong method gives 405.
-- Handler: an `async fn` whose arguments are extractors and whose return type implements `IntoResponse`. The `Handler` trait error means one of those doesn't fit.
-- Extractors: `State`, `Path`, `Query`, `Json`, `HeaderMap`, `Request`. Body extractors go last. Failed extraction gives an automatic 4xx.
-- Destructure in the parameter: `State(state): State<AppState>`.
-- Responses: `StatusCode`, `String`, tuples, `Redirect`, `Result<T, E>`.
-- State: `Clone + Send + Sync + 'static`, provided with `.with_state()`, which turns `Router<S>` into `Router<()>`.
-- Tests: `ServiceExt::oneshot` calls the router directly.
+> [!TIP]
+> - axum = routing + typed extractors + `IntoResponse`, on top of hyper, tower and tokio.
+> - `Router::new().route("/p", get(a).post(b))`. `merge`, `nest`. Unknown path gives 404. Wrong method gives 405.
+> - Handler: an `async fn` whose arguments are extractors and whose return type implements `IntoResponse`. The `Handler` trait error means one of those doesn't fit.
+> - Extractors: `State`, `Path`, `Query`, `Json`, `HeaderMap`, `Request`. Body extractors go last. Failed extraction gives an automatic 4xx.
+> - Destructure in the parameter: `State(state): State<AppState>`.
+> - Responses: `StatusCode`, `String`, tuples, `Redirect`, `Result<T, E>`.
+> - State: `Clone + Send + Sync + 'static`, provided with `.with_state()`, which turns `Router<S>` into `Router<()>`.
+> - Tests: `ServiceExt::oneshot` calls the router directly.

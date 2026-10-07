@@ -1,3 +1,8 @@
+---
+tags: [concept, tooling]
+aliases: ["cargo", "clippy", "rustfmt", "cargo mutants", "mutation testing"]
+---
+
 # Cargo and code checks
 
 > Concept · Used in: [01. Cargo and tooling config](../../files/01-cargo-and-tooling.md) · Prev: [Config and deployment](../web/config-and-deploy.md) · [Index](../../README.md)
@@ -149,8 +154,9 @@ An **equivalent mutant** changes the code without changing the behavior, so no t
 
 ## Quick revise
 
-- Cargo builds, runs, tests and manages dependencies. `Cargo.toml` is the manifest. `Cargo.lock` pins exact versions.
-- `"1.2.3"` means `>=1.2.3, <2.0.0`. For `0.x`, a minor bump counts as breaking.
-- `features` turn on optional parts of a crate. `dev-dependencies` are for tests only.
-- `cargo fmt`: formatting. `cargo clippy`: lints. Lint levels are allow, warn, deny, forbid. `-D warnings` makes warnings fail the command.
-- `cargo mutants` changes code to check that tests notice. Missed mutant = untested behavior. Equivalent mutant = untestable, so exclude it.
+> [!TIP]
+> - Cargo builds, runs, tests and manages dependencies. `Cargo.toml` is the manifest. `Cargo.lock` pins exact versions.
+> - `"1.2.3"` means `>=1.2.3, <2.0.0`. For `0.x`, a minor bump counts as breaking.
+> - `features` turn on optional parts of a crate. `dev-dependencies` are for tests only.
+> - `cargo fmt`: formatting. `cargo clippy`: lints. Lint levels are allow, warn, deny, forbid. `-D warnings` makes warnings fail the command.
+> - `cargo mutants` changes code to check that tests notice. Missed mutant = untested behavior. Equivalent mutant = untestable, so exclude it.

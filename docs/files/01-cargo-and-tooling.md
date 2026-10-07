@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["Cargo.toml", "clippy.toml", "mutants.toml", ".gitignore"]
+---
+
 # 01. Cargo and tooling config
 
 > Synced at commit `7e4f19b` · Next: [02. main.rs and the module tree](02-main-and-modules.md) · [Index](../README.md)
@@ -198,10 +203,11 @@ A leading `/` means "only at the repo root". `*` matches anything, so `/mutants.
 
 ## Quick revise
 
-- `Cargo.toml` has four sections: `[package]` (name, version, edition), `[dependencies]` (used by the app), `[dev-dependencies]` (used only by tests), and `[lints.clippy]` (lint levels).
-- `"1.2.3"` means "compatible with 1.2.3". `Cargo.lock` pins the exact versions. Commit it for apps.
-- `features = [...]` switches on optional parts of a crate.
-- Lint levels go in `Cargo.toml`. Lint settings go in `clippy.toml`.
-- In this repo, `unwrap()` and `anyhow`'s `.context()` are banned. Use `?`, `expect`, and `with_context`.
-- `.cargo/mutants.toml` skips `main.rs` and one equivalent mutant.
-- `.gitignore` keeps build output, secrets, real data and reports out of git.
+> [!TIP]
+> - `Cargo.toml` has four sections: `[package]` (name, version, edition), `[dependencies]` (used by the app), `[dev-dependencies]` (used only by tests), and `[lints.clippy]` (lint levels).
+> - `"1.2.3"` means "compatible with 1.2.3". `Cargo.lock` pins the exact versions. Commit it for apps.
+> - `features = [...]` switches on optional parts of a crate.
+> - Lint levels go in `Cargo.toml`. Lint settings go in `clippy.toml`.
+> - In this repo, `unwrap()` and `anyhow`'s `.context()` are banned. Use `?`, `expect`, and `with_context`.
+> - `.cargo/mutants.toml` skips `main.rs` and one equivalent mutant.
+> - `.gitignore` keeps build output, secrets, real data and reports out of git.

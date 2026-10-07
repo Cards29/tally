@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["config.rs", "state.rs", "Config", "AppState"]
+---
+
 # 03. Config and state
 
 > Synced at commit `7e4f19b` · Prev: [02. main.rs and the module tree](02-main-and-modules.md) · Next: [04. Routes](04-routes.md) · [Index](../README.md)
@@ -237,9 +242,10 @@ Note that `unwrap_or_else` here is not `unwrap()`. It never panics. It's a `Resu
 
 ## Quick revise
 
-- `AppState` (`file_name` and `auth_token`, both `String`) is cloned for every request, so it derives `Clone`. `Config` = `AppState` + `port`, and is only used at startup.
-- `impl Type { fn f() -> Self }`: an associated function with no `self`, called as `Type::f()`. `Self` = the type itself.
-- `dotenvy::dotenv().ok()`: load `.env` if it exists, otherwise ignore. It never overrides variables already set.
-- Required variables: `env::var(...).with_context(...)?`, which fails fast at startup.
-- Optional variables: `.unwrap_or_else(|_| default)`. `.parse()` picks its target type from `let x: u16`, or from the turbofish `parse::<u16>()`.
-- Field init shorthand: write `name` instead of `name: name`.
+> [!TIP]
+> - `AppState` (`file_name` and `auth_token`, both `String`) is cloned for every request, so it derives `Clone`. `Config` = `AppState` + `port`, and is only used at startup.
+> - `impl Type { fn f() -> Self }`: an associated function with no `self`, called as `Type::f()`. `Self` = the type itself.
+> - `dotenvy::dotenv().ok()`: load `.env` if it exists, otherwise ignore. It never overrides variables already set.
+> - Required variables: `env::var(...).with_context(...)?`, which fails fast at startup.
+> - Optional variables: `.unwrap_or_else(|_| default)`. `.parse()` picks its target type from `let x: u16`, or from the turbofish `parse::<u16>()`.
+> - Field init shorthand: write `name` instead of `name: name`.

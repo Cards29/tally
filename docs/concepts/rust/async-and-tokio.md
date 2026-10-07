@@ -1,3 +1,8 @@
+---
+tags: [concept, rust]
+aliases: ["async", "await", "future", "tokio", "runtime"]
+---
+
 # async and tokio
 
 > Concept · First seen in: [02. main.rs and the module tree](../../files/02-main-and-modules.md) · Prev: [Macros and attributes](macros-and-attributes.md) · Next: [Testing](testing.md) · [Index](../../README.md)
@@ -122,10 +127,11 @@ For now, just recognize it. It comes up again with shared state.
 
 ## Quick revise
 
-- Async lets a few threads handle many waiting tasks: a task gives up its thread at each `.await`.
-- `async fn` returns a lazy **future**. Nothing runs until something `.await`s it.
-- Rust has no built-in runtime. tokio provides the executor, the reactor, and async I/O.
-- `#[tokio::main]` builds the runtime and `block_on`s your async `main`.
-- `tokio::spawn` creates a task. `axum::serve` spawns one task per connection.
-- Never block inside async. Use tokio's APIs or `spawn_blocking`. This repo uses blocking `std::fs` on purpose, because the load is tiny.
-- Values held across an `.await` must be `Send`.
+> [!TIP]
+> - Async lets a few threads handle many waiting tasks: a task gives up its thread at each `.await`.
+> - `async fn` returns a lazy **future**. Nothing runs until something `.await`s it.
+> - Rust has no built-in runtime. tokio provides the executor, the reactor, and async I/O.
+> - `#[tokio::main]` builds the runtime and `block_on`s your async `main`.
+> - `tokio::spawn` creates a task. `axum::serve` spawns one task per connection.
+> - Never block inside async. Use tokio's APIs or `spawn_blocking`. This repo uses blocking `std::fs` on purpose, because the load is tiny.
+> - Values held across an `.await` must be `Send`.

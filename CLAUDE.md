@@ -77,7 +77,8 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 - Do not use `docs/` as a source for design, plans, or conventions. Read the code and this file instead.
 - Claude writes and commits `docs/` (an exception to "suggest code only"), but only when the user asks, after a big coding part is finished.
 - Layout: `docs/README.md` (index + reading paths), `docs/files/NN-*.md` (line-by-line per file group, with `Synced at commit <hash>`), `docs/concepts/{rust,web,tooling}/*.md` (one idea each, written when first seen).
-- Every doc ends with "Try it" and "Quick revise". Docs are plain English, not caveman.
+- Every doc starts with YAML frontmatter (`tags`, `aliases`) and ends with "Try it" and a "Quick revise" section in a `> [!TIP]` callout. Docs are plain English, not caveman.
+- Docs are read in Obsidian and on GitHub: use relative `[text](path.md)` links only. No `[[wikilinks]]`, no `#heading` anchors (they differ between the two). Callouts only `NOTE`/`TIP`/`IMPORTANT`/`WARNING`/`CAUTION`.
 - To update: `git diff <synced hash>`, update affected file docs, add new concept docs, bump hashes, update README links.
 
 ## Tests

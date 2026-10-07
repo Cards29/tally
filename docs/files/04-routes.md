@@ -1,3 +1,8 @@
+---
+tags: [file-doc]
+aliases: ["routes.rs", "router"]
+---
+
 # 04. Routes
 
 > Synced at commit `7e4f19b` · Prev: [03. Config and state](03-config-and-state.md) · Next: [05. Auth middleware](05-middleware-auth.md) · [Index](../README.md)
@@ -198,9 +203,10 @@ No `;` at the end, so this is the return value.
 
 ## Quick revise
 
-- `Router::new().route(path, method_router)`. Method routers chain: `post(a).get(b).delete(c)`. Unmatched methods get 405.
-- A handler can be a named function (`health::check`, passed without `()`) or a closure `|| async { ... }`.
-- `Redirect::temporary` gives 307 with a `Location` header.
-- Two routers: `public` and `protected`. `route_layer(from_fn_with_state(state.clone(), auth::require_token))` protects only the routes added before it. Unknown paths still get 404.
-- `merge` combines the routers. `with_state(state)` turns `Router<AppState>` into `Router<()>`, which can be served.
-- `state.clone()` because both the layer and `with_state` need their own copy.
+> [!TIP]
+> - `Router::new().route(path, method_router)`. Method routers chain: `post(a).get(b).delete(c)`. Unmatched methods get 405.
+> - A handler can be a named function (`health::check`, passed without `()`) or a closure `|| async { ... }`.
+> - `Redirect::temporary` gives 307 with a `Location` header.
+> - Two routers: `public` and `protected`. `route_layer(from_fn_with_state(state.clone(), auth::require_token))` protects only the routes added before it. Unknown paths still get 404.
+> - `merge` combines the routers. `with_state(state)` turns `Router<AppState>` into `Router<()>`, which can be served.
+> - `state.clone()` because both the layer and `with_state` need their own copy.
