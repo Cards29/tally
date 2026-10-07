@@ -71,6 +71,15 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 - `clear_last` is a non-atomic read-then-write: a `POST /log` between the read and the write is lost, and a crash mid-write truncates the log. Fix when `LogStore` lands (e.g. a mutex in the store).
 - Store the log path as `PathBuf` / `&Path` instead of `String` / `&str`. Removes the `.to_str().expect(...)` in both `temp_log()` helpers. Cost: error messages need `file_name.display()`.
 
+## Docs
+
+- `docs/` is a Rust/backend learning guide for the user, written *after* the code. It describes the code; it never drives it.
+- Do not use `docs/` as a source for design, plans, or conventions. Read the code and this file instead.
+- Claude writes and commits `docs/` (an exception to "suggest code only"), but only when the user asks, after a big coding part is finished.
+- Layout: `docs/README.md` (index + reading paths), `docs/files/NN-*.md` (line-by-line per file group, with `Synced at commit <hash>`), `docs/concepts/{rust,web,tooling}/*.md` (one idea each, written when first seen).
+- Every doc ends with "Try it" and "Quick revise". Docs are plain English, not caveman.
+- To update: `git diff <synced hash>`, update affected file docs, add new concept docs, bump hashes, update README links.
+
 ## Tests
 
 Tests assert current behavior. Never change app behavior to make a test pass. 15 tests (9 unit + 6 integration), not full coverage.
