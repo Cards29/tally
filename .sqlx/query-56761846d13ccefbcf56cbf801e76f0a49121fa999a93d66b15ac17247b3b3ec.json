@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select display_name, role from users where handle = 'alice'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "role"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "56761846d13ccefbcf56cbf801e76f0a49121fa999a93d66b15ac17247b3b3ec"
+}

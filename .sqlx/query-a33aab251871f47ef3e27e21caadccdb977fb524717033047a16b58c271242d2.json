@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select last_used_at from sessions",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_used_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sessions",
+            "name": "last_used_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a33aab251871f47ef3e27e21caadccdb977fb524717033047a16b58c271242d2"
+}

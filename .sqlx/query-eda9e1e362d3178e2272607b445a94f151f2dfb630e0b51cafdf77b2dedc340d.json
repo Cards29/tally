@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select created_at from entries where user_id = $1 order by created_at desc, id desc limit 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "entries",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "eda9e1e362d3178e2272607b445a94f151f2dfb630e0b51cafdf77b2dedc340d"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select last_seen_at from users",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_seen_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "last_seen_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "75393f1b258816e5e9a8bbd1d60c48c91d6b36fc973fa844fb51070104980277"
+}

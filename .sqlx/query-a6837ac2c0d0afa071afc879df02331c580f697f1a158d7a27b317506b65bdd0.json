@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select kind, name from sessions where token_hash = $1 and user_id = (select id from users where handle = 'alice')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sessions",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sessions",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "a6837ac2c0d0afa071afc879df02331c580f697f1a158d7a27b317506b65bdd0"
+}

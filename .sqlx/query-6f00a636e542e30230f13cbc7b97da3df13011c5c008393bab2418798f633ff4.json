@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update sessions set last_used_at = now() - interval '2 hours' returning last_used_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_used_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sessions",
+            "name": "last_used_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6f00a636e542e30230f13cbc7b97da3df13011c5c008393bab2418798f633ff4"
+}

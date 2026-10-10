@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update users set last_seen_at = now() - interval '2 hours' returning last_seen_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_seen_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "last_seen_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "171b87ffdae8767c31a214a71c2bff44d17df627eab87a0c3947cfad6dd78712"
+}

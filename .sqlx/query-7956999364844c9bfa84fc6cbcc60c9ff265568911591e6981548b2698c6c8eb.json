@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into sessions (user_id, token_hash, kind, name) select id, $2, 'device', $3 from users where handle = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        },
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7956999364844c9bfa84fc6cbcc60c9ff265568911591e6981548b2698c6c8eb"
+}
