@@ -1,8 +1,9 @@
 use std::env;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
+use sqlx::PgPool;
 
-use crate::state::AppState;
+use crate::{state::AppState, storage::log_store::LogStore};
 
 /// Runtime settings read from environment variables.
 pub struct Config {
@@ -13,25 +14,36 @@ pub struct Config {
 }
 
 impl Config {
-    /// Loads `.env` if present, then builds a `Config` from `FILE_NAME`, `AUTH_TOKEN` and `PORT`.
+    /// Loads `.env` if present, then builds a `Config` from `DATABASE_URL`,
+    /// `STORAGE`, `FILE_NAME` and `PORT`.
+    ///
+    /// Does not connect to the database yet: the pool opens connections on first use.
     ///
     /// # Errors
-    /// Returns an error if `FILE_NAME` or `AUTH_TOKEN` is unset, or if `PORT` is not a valid `u16`.
+    /// Returns an error if `DATABASE_URL` is unset or invalid, `STORAGE` is not
+    /// `postgres` or `file`, `FILE_NAME` is unset when `STORAGE=file`, or `PORT`
+    /// is not a valid `u16`.
     pub fn from_env() -> Result<Self> {
         dotenvy::dotenv().ok();
 
-        let file_name = env::var("FILE_NAME").with_context(|| "FILE_NAME must be set")?;
-        let auth_token = env::var("AUTH_TOKEN").with_context(|| "AUTH_TOKEN must be set")?;
+        let database_url = env::var("DATABASE_URL").with_context(|| "DATABASE_URL must be set")?;
+        let pool = PgPool::connect_lazy(&database_url)
+            .with_context(|| "DATABASE_URL must be a valid postgres URL")?;
+        let storage = env::var("STORAGE").unwrap_or_else(|_| "postgres".to_string());
+        let log = match storage.as_str() {
+            "postgres" => LogStore::Postgres(pool.clone()),
+            "file" => LogStore::File(
+                env::var("FILE_NAME").with_context(|| "FILE_NAME must be set when STORAGE=file")?,
+            ),
+            other => bail!("STORAGE must be postgres or file, got {other:?}"),
+        };
         let port: u16 = env::var("PORT")
             .unwrap_or_else(|_| "3000".to_string())
             .parse()
             .with_context(|| "PORT must be a number between 0 and 65535")?;
 
         Ok(Self {
-            state: AppState {
-                file_name,
-                auth_token,
-            },
+            state: AppState { pool, log },
             port,
         })
     }

@@ -100,6 +100,9 @@ async fn log_lifecycle_with_valid_token() {
     let (status, first) = send(&app, Method::POST, "/log", Some(TOKEN)).await;
     assert_eq!(status, StatusCode::OK);
 
+    chrono::NaiveDateTime::parse_from_str(&first, "%a, %b %d %Y %H:%M:%S UTC")
+        .expect("entry should match the response format");
+
     let (status, second) = send(&app, Method::POST, "/log", Some(TOKEN)).await;
     assert_eq!(status, StatusCode::OK);
 

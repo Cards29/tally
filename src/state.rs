@@ -1,8 +1,12 @@
+use sqlx::PgPool;
+
+use crate::storage::log_store::LogStore;
+
 /// Shared state that every handler and the auth middleware receive.
 #[derive(Clone)]
 pub struct AppState {
-    /// Path of the log file.
-    pub file_name: String,
-    /// Bearer token that protected routes require.
-    pub auth_token: String,
+    /// Database pool. Users and sessions always live here, whatever `log` is.
+    pub pool: PgPool,
+    /// Where log entries are stored.
+    pub log: LogStore,
 }
