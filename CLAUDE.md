@@ -1,6 +1,6 @@
 # rust_web_app
 
-Rust learning project: an axum + tokio web app that logs button-press timestamps sent from the owner's phone. Deployed on Render (free tier) from git.
+Rust learning project: an axum + tokio web app that logs button-press timestamps sent from the owner's phone. Entries belong to a user and live in Postgres. Deployed on Render (free tier) from git.
 
 ## Working rules
 
@@ -10,38 +10,50 @@ Rust learning project: an axum + tokio web app that logs button-press timestamps
 - Keep changes minimal and targeted. No new features, refactors, or abstractions unless asked.
 - Branch: work only on `dev`. Never push, merge, or touch `main`.
 - Ask before: adding any dependency, deleting any file, or running any git command other than `git status` / `git diff`.
-- Never read or print `.env` or `dates.log`. Use fake values like `"test-token"` in tests.
+- Never read or print `.env` or `dates.log`. Use obviously fake values in tests (e.g. `"tly_wrong"`).
 
 ## Layout
 
-- `src/main.rs`: `Config::from_env()?` → `routes::router(config.state)` → bind `0.0.0.0:{port}` + serve.
-- `src/config.rs`: `Config { state: AppState, port }`. `from_env` loads `.env` via `dotenvy`, then reads `FILE_NAME`, `AUTH_TOKEN`, `PORT` (default 3000).
-- `src/state.rs`: `AppState { file_name, auth_token }`, `Clone`.
+- `src/main.rs`: clap CLI. `Config::from_env()?`, then one of:
+  - `serve` (default): runs `sqlx::migrate!()`, then `routes::router(config.state)`, binds `0.0.0.0:{port}` and serves. Migrations run only here, so the CLI pointed at Neon never applies dev migrations to prod.
+  - `create-admin --handle <h> --display-name <n>`: inserts an admin user.
+  - `create-device-token --handle <h> --name <n>`: prints a new device token once.
+- `src/config.rs`: `Config { state: AppState, port }`. `from_env` loads `.env` via `dotenvy`, then reads `DATABASE_URL` (required; `PgPool::connect_lazy`, so it stays sync), `STORAGE` (`postgres` default, or `file`), `FILE_NAME` (required only when `STORAGE=file`) and `PORT` (default 3000). See `.env.example`.
+- `src/state.rs`: `AppState { pool: PgPool, log: LogStore }`, `Clone`. Users and sessions always live in `pool`, whatever `log` is.
 - `src/error.rs`: `AppError(anyhow::Error)` newtype. `IntoResponse` logs the error and returns a bare 500. Blanket `From<E: Into<anyhow::Error>>`.
 - `src/routes.rs`: builds the router.
-- `src/handlers/{health,log}.rs`, `src/middleware/auth.rs`, `src/storage/log.rs`.
+- `src/handlers/{health,log}.rs`, `src/middleware/auth.rs`, `src/storage/{log,log_store,postgres,tokens,users}.rs`.
 - Parent module files (`handlers.rs`, `middleware.rs`, `storage.rs`) only hold `pub mod` lines.
+- `migrations/0001_init.sql`: `users`, `sessions`, `entries`. Every `id` is `uuid default uuidv7()` (built into Postgres 18), so inserts omit it. `handle` is `citext`.
+- `build.rs`: `rerun-if-changed=migrations`, so `sqlx::migrate!()` picks up new migrations.
+- `.sqlx/`: committed offline query data, so builds work without a database. After changing any `query!`, run `cargo sqlx prepare -- --all-targets` and commit `.sqlx/`.
 
 ## Routes
 
 - Public: `GET /` (temporary redirect to `/health`), `GET /health` (200).
-- Protected by `route_layer(from_fn_with_state(state.clone(), auth::require_token))`:
+- Protected by `route_layer(from_fn_with_state(state.clone(), auth::require_token))`. Each acts only on the caller's own entries:
   - `POST /log` adds an entry and returns it
-  - `GET /log` returns the whole log
+  - `GET /log` returns the whole log, one entry per line
   - `DELETE /log` clears the log (204)
   - `GET /log/last` returns the last entry
   - `DELETE /log/last` removes the last entry (204)
-- Auth: `Authorization: Bearer <AUTH_TOKEN>`, constant-time compare via `subtle`, 401 if missing or wrong.
+- Entries are formatted in UTC: `%a, %b %d %Y %H:%M:%S UTC` (`TIME_FORMAT` in `handlers/log.rs`).
+- Auth: `Authorization: Bearer <token>`. The SHA-256 of the token is looked up in `sessions` (unexpired only). 401 if the header is missing or no session matches. On success, `CurrentUser { id }` goes into request extensions and handlers read it with `Extension<CurrentUser>`. `sessions.last_used_at` and `users.last_seen_at` are updated at most once an hour per session.
 
 ## Storage
 
-`src/storage/log.rs` uses blocking `std::fs`. Function names match the handlers in `src/handlers/log.rs`:
-- `add_entry`: appends the current local time (`TIME_FORMAT` = `%a, %b %d %Y %H:%M:%S`, 24-hour) and returns it.
-- `show_log`: returns the file contents. A missing file (`NotFound`) means an empty log, not an error.
-- `show_last` and `clear_last` both use the private `split_last_line`, so they agree on what "last line" means.
-- `clear_all`.
+Entries are `DateTime<Utc>`. `LogStore` (`storage/log_store.rs`) is an enum, `File(String)` or `Postgres(PgPool)`, picked by `STORAGE`. It is an enum, not a trait, because async trait methods can't be `dyn`, and a generic `AppState<S>` would spread a type parameter through every route. Its async methods take `user_id`, `match` on the store and delegate. Function names match the handlers:
+- `add_entry` returns the new entry, `show_log` returns all entries oldest first, `show_last` returns `Option`, and `clear_last` and `clear_all` return `()`.
 
-Known current behavior: `GET /log/last` on an empty log returns 200 with an empty body. This is planned to become 404 later.
+`storage/postgres.rs`: free functions taking `(&PgPool, Uuid)`, using `query!` / `query_scalar!`. Ordering is `created_at, id`. `clear_last` is one `DELETE ... WHERE id = (SELECT ... LIMIT 1)`, so it is atomic.
+
+`storage/log.rs`: the file store, using blocking `std::fs`. Single-user: ignores `user_id`, so every user shares one log. It writes one RFC 3339 UTC line per entry (`to_rfc3339_opts(AutoSi, true)`). A missing file (`NotFound`) means an empty log, not an error. `show_last` and `clear_last` go through `show_log`.
+
+`storage/tokens.rs`: `generate()` returns `tly_` plus base64url (no padding) of 32 bytes from `rand::rngs::SysRng`. `hash()` returns the token's SHA-256. Only hashes are stored.
+
+`storage/users.rs`: `create_admin` and `create_device_token` (`insert ... select ... where handle = $1`; bails `no user with handle {handle}` if no row was inserted).
+
+Known current behavior: `GET /log/last` on an empty log returns 200 with an empty body. Step 2 changes this to 404.
 
 ## Conventions
 
@@ -62,14 +74,14 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 
 ## Planned (not yet done)
 
-- `LogStore` trait for storage (do not add until asked).
-- `GET /log/last` returns 404 on an empty log.
-- Move storage to a cloud database. Render's free-tier filesystem is wiped on spin-down and deploy.
-- Timezones: Render runs in UTC, so `chrono::Local` stamps entries in UTC, not the owner's time.
-  - Now (no code): set `TZ` in Render's environment (e.g. `TZ=Asia/Dhaka`). If it still shows UTC, the image lacks tzdata; use a POSIX string instead (`TZ=<+06>-6` for UTC+6, sign inverted). Zone is fixed, so travel isn't handled.
-  - With the cloud database: store UTC instants (`DateTime<Utc>` / Postgres `timestamptz`), not formatted strings. The client sends its zone (e.g. an `X-Timezone: Asia/Dhaka` header) and the server formats entries in that zone on read. Needs the `chrono-tz` crate (ask before adding).
-- `clear_last` is a non-atomic read-then-write: a `POST /log` between the read and the write is lost, and a crash mid-write truncates the log. Fix when `LogStore` lands (e.g. a mutex in the store).
-- Store the log path as `PathBuf` / `&Path` instead of `String` / `&str`. Removes the `.to_str().expect(...)` in both `temp_log()` helpers. Cost: error messages need `file_name.display()`.
+The cloud-storage round is planned step by step outside this file (step 1 done: Postgres, users, device tokens, CLI). Next:
+- Step 2: JSON responses, `AppError` becomes an enum (400/401/403/404/...), `GET /log/last` returns 404 on an empty log.
+- Step 3: deploy on Neon (`SQLX_OFFLINE=true` on Render).
+- Later steps: accounts, invites, email, hardening.
+- Timezones: entries are stored and shown in UTC. Per-user zones (`users.timezone`, `chrono-tz`, an `X-Timezone` header) come later. Don't set `TZ` on Render: nothing reads local time any more.
+- The file store's `clear_last` is still a non-atomic read-then-write (the Postgres store's isn't).
+- Store the file log path as `PathBuf` / `&Path` instead of `String` / `&str`. Removes the `.to_str().expect(...)` in both `temp_log()` helpers. Cost: error messages need `file_name.display()`.
+- `uuid` crate's `v7` feature is unused (the DB generates ids). Drop it if no Rust code ever calls `Uuid::now_v7()`.
 
 ## Docs
 
@@ -83,15 +95,15 @@ Known current behavior: `GET /log/last` on an empty log returns 200 with an empt
 
 ## Tests
 
-Tests assert current behavior. Never change app behavior to make a test pass. 15 tests (9 unit + 6 integration), not full coverage.
+Tests assert current behavior. Never change app behavior to make a test pass. 30 tests (22 unit + 8 integration), not full coverage.
 
+- DB tests use `#[sqlx::test]`: each test gets a fresh temporary database with migrations applied, dropped afterward. They need the local Postgres container running and `DATABASE_URL` set (from `.env`).
 - `src/lib.rs` holds all `pub mod` lines so `tests/` can import `tally::...`. Dev-dependencies: `tempfile` (auto-deleted temp dirs) and `tower` with `util` (`ServiceExt::oneshot`).
-- Unit tests: `#[cfg(test)] mod tests` at the bottom of `src/storage/log.rs`, sharing a `temp_log()` helper. `use super::*` already brings in the parent's imports (e.g. `fs`).
-- Integration tests: `tests/routes.rs` drives `routes::router(state)` with `oneshot`. Helpers: `TOKEN = "test-token"`, `PROTECTED` (all protected method+path pairs), `temp_log()`, `app(file_name)`, and `send(&app, method, uri, token) -> (StatusCode, String)`, which builds the request and reads the body. Every test goes through `send`.
-- Every test uses `temp_log()`, even ones that never reach storage, so a broken auth layer can't write a real file.
-- To force a storage error, create a directory at the log path (reading a directory as a file fails).
+- Unit tests: `#[cfg(test)] mod tests` at the bottom of `storage/{log,postgres,tokens,users}.rs`. `log.rs` tests share a `temp_log()` helper; `postgres.rs` tests insert users with a `user()` helper. `use super::*` already brings in the parent's imports.
+- Integration tests: `tests/routes.rs` drives `routes::router(state)` with `oneshot`. Helpers: `PROTECTED` (all protected method+path pairs), `temp_log()`, `app(&pool)` (Postgres store), `user_token(&pool, handle)` (creates a user through `users::create_admin` + `users::create_device_token` and returns the token), and `send(&app, method, uri, token) -> (StatusCode, String)`, which builds the request and reads the body. Every test goes through `send`.
+- To force a storage error, use the file store and create a directory at the log path (reading a directory as a file fails).
 - `last_entry_on_empty_log_returns_ok_with_empty_body` asserts 200 + empty body. Update it when the 404 change lands.
-- Mutation testing: `cargo mutants`, configured in `.cargo/mutants.toml` (skips `main.rs` and one equivalent mutant in `health.rs`). `mutants.out*` is gitignored.
+- Mutation testing: `cargo mutants`, configured in `.cargo/mutants.toml` (skips `main.rs` and equivalent mutants in `health.rs` and `auth.rs`). Needs the local DB. `/tmp` is a 7.7G tmpfs: use `-j 2`, or set `TMPDIR` to a directory on disk. If most mutants come back unviable, check the logs for `Disk quota exceeded` before trusting `missed.txt`. `mutants.out*` is gitignored.
 
 Test style:
 - Behavior names without a `test_` prefix.
